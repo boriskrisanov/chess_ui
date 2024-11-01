@@ -6,7 +6,7 @@
 #include <QtSvg/QtSvg>
 #include <QtSvgWidgets/QtSvgWidgets>
 
-#include "Board.hpp"
+#include "BoardWidget.hpp"
 
 class Window : public QWidget
 {
@@ -29,5 +29,5 @@ public:
     }
 private:
     // QSvgWidget* svg = new QSvgWidget(this);
-    Board* board = new Board(this);
+    BoardWidget* board = new BoardWidget(this);
 };

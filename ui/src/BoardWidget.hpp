@@ -4,13 +4,14 @@
 #include <QPushButton>
 #include <QtSvg/QtSvg>
 #include <QtSvgWidgets/QtSvgWidgets>
+#include "Board.hpp"
 
-class Board : public QWidget
+class BoardWidget : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit Board(QWidget* parent = nullptr)
+    explicit BoardWidget(QWidget* parent = nullptr)
         : QWidget(parent)
     {
     }
@@ -36,4 +37,5 @@ private:
     const QColor lightSquareColor{240, 217, 181};
     const QColor darkSquareColor{181, 136, 99};
     const int squareSize = 50;
+    Board board;
 };
