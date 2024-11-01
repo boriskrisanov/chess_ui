@@ -5,6 +5,7 @@
 #include <QtSvg/QtSvg>
 #include <QtSvgWidgets/QtSvgWidgets>
 #include "Board.hpp"
+#include <iostream>
 
 class BoardWidget : public QWidget
 {
@@ -14,6 +15,7 @@ public:
     explicit BoardWidget(QWidget* parent = nullptr)
         : QWidget(parent)
     {
+        board.loadFen(STARTING_POSITION_FEN);
     }
 
     void paintEvent(QPaintEvent* event) override
@@ -28,6 +30,18 @@ public:
                 squareColor = squareColor == lightSquareColor ? darkSquareColor : lightSquareColor;
                 QRect square(j * squareSize, i * squareSize, squareSize, squareSize);
                 painter.fillRect(square, squareColor);
+
+                if (!board.isSquareEmpty(index))
+                {
+                    QString pieceFileName = QString::fromStdString(board[index].toString()).toLower() + ".svg";
+                    if (board[index].color == WHITE)
+                    {
+                        pieceFileName.prepend("_");
+                    }
+                    pieceFileName.prepend("pieces/");
+                    QSvgRenderer svg{pieceFileName};
+                    svg.render(&painter, QRect{j * squareSize, i * squareSize, squareSize, squareSize});
+                }
             }
             squareColor = squareColor == lightSquareColor ? darkSquareColor : lightSquareColor;
         }

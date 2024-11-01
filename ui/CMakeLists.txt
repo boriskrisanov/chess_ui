@@ -21,6 +21,7 @@ add_executable(chess_ui_cpp src/main.cpp
 )
 
 target_link_libraries(chess_ui_cpp
+        chess_cpp
         Qt::Core
         Qt::Gui
         Qt::Widgets
