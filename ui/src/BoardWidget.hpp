@@ -94,6 +94,12 @@ public:
         const QPoint mousePosition = event->pos();
         const int newIndex = coordinatesToBoardIndex(mousePosition);
 
+        if (moveStartIndex == newIndex)
+        {
+            pieceWidgets[newIndex]->move(boardIndexToCoordinates(newIndex));
+            return;
+        }
+
         if (pieceWidgets[newIndex] != nullptr)
         {
             delete pieceWidgets[newIndex];
