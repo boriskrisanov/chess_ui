@@ -6,6 +6,7 @@
 #include <QSvgWidget>
 #include "Board.hpp"
 #include <cmath>
+#include <algorithm>
 
 class BoardWidget : public QWidget
 {
@@ -16,6 +17,7 @@ public:
         : QWidget(parent)
     {
         board.loadFen(STARTING_POSITION_FEN);
+        updateLegalMoves();
 
         for (int i = 0; i < 8; i++)
         {
@@ -52,6 +54,13 @@ public:
                 squareColor = squareColor == lightSquareColor ? darkSquareColor : lightSquareColor;
                 QRect square(j * squareSize, i * squareSize, squareSize, squareSize);
                 painter.fillRect(square, squareColor);
+                const auto legalMovesForSquare = legalMoves[moveStartIndex];
+                if (isPieceBeingMoved && std::find(legalMovesForSquare.begin(), legalMovesForSquare.end(), index) !=
+                    legalMovesForSquare.end())
+                {
+                    painter.fillRect(square, legalMoveSquareColor);
+                    // painter.drawEllipse({index + squareSize / 2, index + squareSize / 2}, squareSize / 4, squareSize / 4);
+                }
             }
             squareColor = squareColor == lightSquareColor ? darkSquareColor : lightSquareColor;
         }
@@ -86,6 +95,7 @@ public:
         isPieceBeingMoved = true;
         moveStartIndex = index;
         pieceBeingMoved = board[index];
+        repaint();
     }
 
     void mouseReleaseEvent(QMouseEvent* event) override
@@ -94,9 +104,14 @@ public:
         const QPoint mousePosition = event->pos();
         const int newIndex = coordinatesToBoardIndex(mousePosition);
 
-        if (moveStartIndex == newIndex)
+        const auto legalMovesForSquare = legalMoves[moveStartIndex];
+        const bool isIllegalMove = std::ranges::find(legalMovesForSquare, newIndex) == legalMovesForSquare.end();
+        if (isIllegalMove)
         {
-            pieceWidgets[newIndex]->move(boardIndexToCoordinates(newIndex));
+            // Ignore move
+            pieceWidgets[moveStartIndex]->move(boardIndexToCoordinates(moveStartIndex));
+            isPieceBeingMoved = false;
+            repaint();
             return;
         }
 
@@ -110,6 +125,8 @@ public:
         pieceWidgets[newIndex]->move(boardIndexToCoordinates(newIndex));
         // TODO: Castling, promotion, en passant, etc)
         board.makeMove(Move{static_cast<Square>(moveStartIndex), static_cast<Square>(newIndex), MoveFlag::None});
+        updateLegalMoves();
+        repaint();
     }
 
 private:
@@ -129,11 +146,25 @@ private:
         return {squareSize * file, squareSize * rank};
     }
 
+    void updateLegalMoves()
+    {
+        for (int i = 0; i < 64; i++)
+        {
+            legalMoves[i].clear();
+        }
+        for (Move move : board.getLegalMoves())
+        {
+            legalMoves[move.start()].push_back(move.end());
+        }
+    }
+
     const QColor lightSquareColor{240, 217, 181};
     const QColor darkSquareColor{181, 136, 99};
+    const QColor legalMoveSquareColor{66, 135, 245};
     const int squareSize = 70;
     Board board;
     std::array<QSvgWidget*, 64> pieceWidgets;
+    std::array<std::vector<int>, 64> legalMoves;
 
     bool isPieceBeingMoved = false;
     int moveStartIndex;
