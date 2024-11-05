@@ -123,8 +123,16 @@ public:
         pieceWidgets[newIndex] = pieceWidgets[moveStartIndex];
         pieceWidgets[moveStartIndex] = nullptr;
         pieceWidgets[newIndex]->move(boardIndexToCoordinates(newIndex));
-        // TODO: Castling, promotion, en passant, etc)
-        board.makeMove(Move{static_cast<Square>(moveStartIndex), static_cast<Square>(newIndex), MoveFlag::None});
+        auto moveFlag = MoveFlag::None;
+        if (newIndex == board.getEnPassantTargetSquare())
+        {
+            // By this point we know that this move is legal because we would have early returned otherwise
+            moveFlag = MoveFlag::EnPassant;
+            const int capturedPieceIndex = board.sideToMove == WHITE ? newIndex + 8 : newIndex - 8;
+            delete pieceWidgets[capturedPieceIndex];
+        }
+        // TODO: Promotion
+        board.makeMove(Move{static_cast<Square>(moveStartIndex), static_cast<Square>(newIndex), moveFlag});
         updateLegalMoves();
         repaint();
     }
