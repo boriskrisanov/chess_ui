@@ -61,6 +61,11 @@ public:
                     painter.fillRect(square, legalMoveSquareColor);
                     // painter.drawEllipse({index + squareSize / 2, index + squareSize / 2}, squareSize / 4, squareSize / 4);
                 }
+                if ((board.whiteKing & bitboards::withSquare(index)) != 0 && board.isSideInCheck(WHITE)
+                    || (board.blackKing & bitboards::withSquare(index)) != 0 && board.isSideInCheck(BLACK))
+                {
+                    painter.fillRect(square, checkSquareColor);
+                }
             }
             squareColor = squareColor == lightSquareColor ? darkSquareColor : lightSquareColor;
         }
@@ -169,6 +174,7 @@ private:
     const QColor lightSquareColor{240, 217, 181};
     const QColor darkSquareColor{181, 136, 99};
     const QColor legalMoveSquareColor{66, 135, 245};
+    const QColor checkSquareColor{255, 70, 60};
     const int squareSize = 70;
     Board board;
     std::array<QSvgWidget*, 64> pieceWidgets;
