@@ -7,6 +7,7 @@
 #include "Board.hpp"
 #include <cmath>
 #include <algorithm>
+#include <iostream>
 
 class BoardWidget : public QWidget
 {
@@ -59,7 +60,6 @@ public:
                     legalMovesForSquare.end())
                 {
                     painter.fillRect(square, legalMoveSquareColor);
-                    // painter.drawEllipse({index + squareSize / 2, index + squareSize / 2}, squareSize / 4, squareSize / 4);
                 }
                 if ((board.whiteKing & bitboards::withSquare(index)) != 0 && board.isSideInCheck(WHITE)
                     || (board.blackKing & bitboards::withSquare(index)) != 0 && board.isSideInCheck(BLACK))
@@ -135,6 +135,53 @@ public:
             moveFlag = MoveFlag::EnPassant;
             const int capturedPieceIndex = board.sideToMove == WHITE ? newIndex + 8 : newIndex - 8;
             delete pieceWidgets[capturedPieceIndex];
+        }
+        // Move rook if castling
+        if (board.sideToMove == WHITE)
+        {
+            const Square a1 = square::fromString("a1");
+            const Square c1 = square::fromString("c1");
+            const Square d1 = square::fromString("d1");
+            const Square f1 = square::fromString("f1");
+            const Square g1 = square::fromString("g1");
+            const Square h1 = square::fromString("h1");
+            if (board.canWhiteShortCastle() && newIndex == g1)
+            {
+                pieceWidgets[f1] = pieceWidgets[h1];
+                pieceWidgets[h1]->move(boardIndexToCoordinates(f1));
+                pieceWidgets[h1] = nullptr;
+                moveFlag = MoveFlag::ShortCastling;
+            }
+            else if (board.canWhiteLongCastle() && newIndex == c1)
+            {
+                pieceWidgets[d1] = pieceWidgets[a1];
+                pieceWidgets[a1]->move(boardIndexToCoordinates(d1));
+                pieceWidgets[a1] = nullptr;
+                moveFlag = MoveFlag::LongCastling;
+            }
+        }
+        else
+        {
+            const Square a8 = square::fromString("a8");
+            const Square c8 = square::fromString("c8");
+            const Square d8 = square::fromString("d8");
+            const Square f8 = square::fromString("f8");
+            const Square g8 = square::fromString("g8");
+            const Square h8 = square::fromString("h8");
+            if (board.canBlackShortCastle() && newIndex == g8)
+            {
+                pieceWidgets[f8] = pieceWidgets[h8];
+                pieceWidgets[h8]->move(boardIndexToCoordinates(f8));
+                pieceWidgets[h8] = nullptr;
+                moveFlag = MoveFlag::ShortCastling;
+            }
+            else if (board.canBlackLongCastle() && newIndex == c8)
+            {
+                pieceWidgets[d8] = pieceWidgets[a8];
+                pieceWidgets[a8]->move(boardIndexToCoordinates(d8));
+                pieceWidgets[a8] = nullptr;
+                moveFlag = MoveFlag::LongCastling;
+            }
         }
         // TODO: Promotion
         board.makeMove(Move{static_cast<Square>(moveStartIndex), static_cast<Square>(newIndex), moveFlag});
