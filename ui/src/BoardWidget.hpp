@@ -9,6 +9,8 @@
 #include <algorithm>
 #include <iostream>
 
+#include "search.hpp"
+
 class BoardWidget : public QWidget
 {
     Q_OBJECT
@@ -120,74 +122,10 @@ public:
             return;
         }
 
-        if (pieceWidgets[newIndex] != nullptr)
-        {
-            delete pieceWidgets[newIndex];
-        }
+        const Move move = getMoveFromIndexes(moveStartIndex, newIndex);
+        movePieceWidgets(move);
 
-        pieceWidgets[newIndex] = pieceWidgets[moveStartIndex];
-        pieceWidgets[moveStartIndex] = nullptr;
-        pieceWidgets[newIndex]->move(boardIndexToCoordinates(newIndex));
-        auto moveFlag = MoveFlag::None;
-        if (newIndex == board.getEnPassantTargetSquare())
-        {
-            // By this point we know that this move is legal because we would have early returned otherwise
-            moveFlag = MoveFlag::EnPassant;
-            const int capturedPieceIndex = board.sideToMove == WHITE ? newIndex + 8 : newIndex - 8;
-            delete pieceWidgets[capturedPieceIndex];
-        }
-        // Move rook if castling
-        if (board[moveStartIndex].kind == PieceKind::KING)
-        {
-            if (board.sideToMove == WHITE)
-            {
-                const Square a1 = square::fromString("a1");
-                const Square c1 = square::fromString("c1");
-                const Square d1 = square::fromString("d1");
-                const Square f1 = square::fromString("f1");
-                const Square g1 = square::fromString("g1");
-                const Square h1 = square::fromString("h1");
-                if (board.canWhiteShortCastle() && newIndex == g1)
-                {
-                    pieceWidgets[f1] = pieceWidgets[h1];
-                    pieceWidgets[h1]->move(boardIndexToCoordinates(f1));
-                    pieceWidgets[h1] = nullptr;
-                    moveFlag = MoveFlag::ShortCastling;
-                }
-                else if (board.canWhiteLongCastle() && newIndex == c1)
-                {
-                    pieceWidgets[d1] = pieceWidgets[a1];
-                    pieceWidgets[a1]->move(boardIndexToCoordinates(d1));
-                    pieceWidgets[a1] = nullptr;
-                    moveFlag = MoveFlag::LongCastling;
-                }
-            }
-            else
-            {
-                const Square a8 = square::fromString("a8");
-                const Square c8 = square::fromString("c8");
-                const Square d8 = square::fromString("d8");
-                const Square f8 = square::fromString("f8");
-                const Square g8 = square::fromString("g8");
-                const Square h8 = square::fromString("h8");
-                if (board.canBlackShortCastle() && newIndex == g8)
-                {
-                    pieceWidgets[f8] = pieceWidgets[h8];
-                    pieceWidgets[h8]->move(boardIndexToCoordinates(f8));
-                    pieceWidgets[h8] = nullptr;
-                    moveFlag = MoveFlag::ShortCastling;
-                }
-                else if (board.canBlackLongCastle() && newIndex == c8)
-                {
-                    pieceWidgets[d8] = pieceWidgets[a8];
-                    pieceWidgets[a8]->move(boardIndexToCoordinates(d8));
-                    pieceWidgets[a8] = nullptr;
-                    moveFlag = MoveFlag::LongCastling;
-                }
-            }
-        }
-        // TODO: Promotion
-        board.makeMove(Move{static_cast<Square>(moveStartIndex), static_cast<Square>(newIndex), moveFlag});
+        board.makeMove(move);
         updateLegalMoves();
         repaint();
     }
@@ -201,7 +139,7 @@ private:
         return 8 * rank + file;
     }
 
-    QPoint boardIndexToCoordinates(int index)
+    QPoint boardIndexToCoordinates(int index) const
     {
         int file = index % 8;
         int rank = std::floor(index / 8);
@@ -219,6 +157,106 @@ private:
         {
             legalMoves[move.start()].push_back(move.end());
         }
+    }
+
+    void movePieceWidgets(const Move& move)
+    {
+        // Remove piece if it was captured
+        if (pieceWidgets[move.end()] != nullptr)
+        {
+            delete pieceWidgets[move.end()];
+        }
+        if (move.moveFlag() == MoveFlag::EnPassant)
+        {
+            delete pieceWidgets[board.sideToMove == WHITE ? move.end() + 8 : move.end() - 8];
+        }
+
+        pieceWidgets[move.end()] = pieceWidgets[moveStartIndex];
+        pieceWidgets[moveStartIndex] = nullptr;
+        pieceWidgets[move.end()]->move(boardIndexToCoordinates(move.end()));
+        // Move rook if castling
+
+        if (board.sideToMove == WHITE)
+        {
+            const Square a1 = square::fromString("a1");
+            const Square d1 = square::fromString("d1");
+            const Square f1 = square::fromString("f1");
+            const Square h1 = square::fromString("h1");
+            if (move.moveFlag() == MoveFlag::ShortCastling)
+            {
+                pieceWidgets[f1] = pieceWidgets[h1];
+                pieceWidgets[h1]->move(boardIndexToCoordinates(f1));
+                pieceWidgets[h1] = nullptr;
+            }
+            else if (move.moveFlag() == MoveFlag::LongCastling)
+            {
+                pieceWidgets[d1] = pieceWidgets[a1];
+                pieceWidgets[a1]->move(boardIndexToCoordinates(d1));
+                pieceWidgets[a1] = nullptr;
+            }
+        }
+        else
+        {
+            const Square a8 = square::fromString("a8");
+            const Square d8 = square::fromString("d8");
+            const Square f8 = square::fromString("f8");
+            const Square h8 = square::fromString("h8");
+            if (move.moveFlag() == MoveFlag::ShortCastling)
+            {
+                pieceWidgets[f8] = pieceWidgets[h8];
+                pieceWidgets[h8]->move(boardIndexToCoordinates(f8));
+                pieceWidgets[h8] = nullptr;
+            }
+            else if (move.moveFlag() == MoveFlag::LongCastling)
+            {
+                pieceWidgets[d8] = pieceWidgets[a8];
+                pieceWidgets[a8]->move(boardIndexToCoordinates(d8));
+                pieceWidgets[a8] = nullptr;
+            }
+        }
+
+        // TODO: Promotion
+    }
+
+    Move getMoveFromIndexes(Square start, Square end) const
+    {
+        MoveFlag moveFlag = MoveFlag::None;
+        // En Passant
+        if (board[start].kind == PieceKind::PAWN && end == board.getEnPassantTargetSquare())
+        {
+            moveFlag = MoveFlag::EnPassant;
+        }
+        // Castling
+        else if (board[start].kind == PieceKind::KING)
+        {
+            if (board.sideToMove == WHITE)
+            {
+                const Square c1 = square::fromString("c1");
+                const Square g1 = square::fromString("g1");
+                if (board.canWhiteShortCastle() && end == g1)
+                {
+                    moveFlag = MoveFlag::ShortCastling;
+                }
+                else if (board.canWhiteLongCastle() && end == c1)
+                {
+                    moveFlag = MoveFlag::LongCastling;
+                }
+            }
+            else
+            {
+                const Square c8 = square::fromString("c8");
+                const Square g8 = square::fromString("g8");
+                if (board.canBlackShortCastle() && end == g8)
+                {
+                    moveFlag = MoveFlag::ShortCastling;
+                }
+                else if (board.canBlackLongCastle() && end == c8)
+                {
+                    moveFlag = MoveFlag::LongCastling;
+                }
+            }
+        }
+        return Move{start, end, moveFlag};
     }
 
     const QColor lightSquareColor{240, 217, 181};
