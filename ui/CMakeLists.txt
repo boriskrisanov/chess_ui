@@ -18,6 +18,7 @@ find_package(Qt6SvgWidgets CONFIG REQUIRED)
 add_executable(chess_ui_cpp src/main.cpp
         src/Window.hpp
         src/BoardWidget.hpp
+        src/BoardWidget.cpp
 )
 
 target_link_libraries(chess_ui_cpp
