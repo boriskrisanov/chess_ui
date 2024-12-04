@@ -124,8 +124,15 @@ public:
 
         const Move move = getMoveFromIndexes(moveStartIndex, newIndex);
         movePieceWidgets(move);
-
         board.makeMove(move);
+        updateLegalMoves();
+        repaint();
+
+        // TODO: Do this is in a separate thread so the app doesn't freeze
+        SearchResult searchResult = timeLimitedSearch(board, static_cast<std::chrono::milliseconds>(1000));
+        std::cout << "Engine move: " << static_cast<std::string>(searchResult.bestMove) << "\n";
+        movePieceWidgets(searchResult.bestMove);
+        board.makeMove(searchResult.bestMove);
         updateLegalMoves();
         repaint();
     }
@@ -171,8 +178,8 @@ private:
             delete pieceWidgets[board.sideToMove == WHITE ? move.end() + 8 : move.end() - 8];
         }
 
-        pieceWidgets[move.end()] = pieceWidgets[moveStartIndex];
-        pieceWidgets[moveStartIndex] = nullptr;
+        pieceWidgets[move.end()] = pieceWidgets[move.start()];
+        pieceWidgets[move.start()] = nullptr;
         pieceWidgets[move.end()]->move(boardIndexToCoordinates(move.end()));
         // Move rook if castling
 
