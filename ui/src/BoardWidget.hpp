@@ -1,13 +1,8 @@
 #pragma once
 
-#include <QApplication>
-#include <QPushButton>
-#include <QtSvg/QtSvg>
 #include <QSvgWidget>
 #include "Board.hpp"
-#include <cmath>
-#include <algorithm>
-#include <iostream>
+#include "PromotionSelector.hpp"
 
 #include "search.hpp"
 
@@ -29,6 +24,7 @@ private:
     void updateLegalMoves();
     void movePieceWidgets(const Move& move);
     Move getMoveFromIndexes(Square start, Square end) const;
+    void addPieceWidget(Piece piece, Square position);
 
     const QColor lightSquareColor{240, 217, 181};
     const QColor darkSquareColor{181, 136, 99};
@@ -38,8 +34,9 @@ private:
     Board board;
     std::array<QSvgWidget*, 64> pieceWidgets;
     std::array<std::vector<int>, 64> legalMoves;
-
     bool isPieceBeingMoved = false;
     int moveStartIndex;
     Piece pieceBeingMoved;
+
+    PromotionSelector* promotionSelector = new PromotionSelector(this);
 };

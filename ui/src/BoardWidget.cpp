@@ -1,9 +1,13 @@
 #include "BoardWidget.hpp"
+#include <QSvgWidget>
+#include <QPainter>
+#include <QMouseEvent>
 
 BoardWidget::BoardWidget(QWidget* parent)
     : QWidget(parent)
 {
-    board.loadFen(STARTING_POSITION_FEN);
+    board.loadFen("8/1k4P1/8/1K6/8/8/8/8 w - - 0 1");
+    // board.loadFen(STARTING_POSITION_FEN);
     updateLegalMoves();
 
     for (int i = 0; i < 8; i++)
@@ -15,16 +19,7 @@ BoardWidget::BoardWidget(QWidget* parent)
             {
                 continue;
             }
-            QString fileName = QString::fromStdString(board[index].toString()).toLower() + ".svg";
-            if (board[index].color == WHITE)
-            {
-                fileName.prepend("_");
-            }
-            fileName.prepend("pieces/");
-            auto* piece = new QSvgWidget(fileName, this);
-            pieceWidgets[index] = piece;
-            piece->setGeometry(j * squareSize, i * squareSize, squareSize, squareSize);
-            piece->show();
+            addPieceWidget(board[index], index);
         }
     }
 }
@@ -107,6 +102,7 @@ void BoardWidget::mouseReleaseEvent(QMouseEvent* event)
     }
 
     const Move move = getMoveFromIndexes(moveStartIndex, newIndex);
+
     movePieceWidgets(move);
     board.makeMove(move);
     updateLegalMoves();
@@ -114,7 +110,6 @@ void BoardWidget::mouseReleaseEvent(QMouseEvent* event)
 
     // TODO: Do this is in a separate thread so the app doesn't freeze
     SearchResult searchResult = timeLimitedSearch(board, static_cast<std::chrono::milliseconds>(1000));
-    std::cout << "Engine move: " << static_cast<std::string>(searchResult.bestMove) << "\n";
     movePieceWidgets(searchResult.bestMove);
     board.makeMove(searchResult.bestMove);
     updateLegalMoves();
@@ -131,8 +126,8 @@ int BoardWidget::coordinatesToBoardIndex(QPoint coordinates) const
 
 QPoint BoardWidget::boardIndexToCoordinates(int index) const
 {
-    int file = index % 8;
-    int rank = std::floor(index / 8);
+    const int file = index % 8;
+    const int rank = std::floor(index / 8);
 
     return {squareSize * file, squareSize * rank};
 }
@@ -155,17 +150,48 @@ void BoardWidget::movePieceWidgets(const Move& move)
     if (pieceWidgets[move.end()] != nullptr)
     {
         delete pieceWidgets[move.end()];
+        // No need to set to nullptr because it will be overwritten anyway
     }
     if (move.moveFlag() == MoveFlag::EnPassant)
     {
-        delete pieceWidgets[board.sideToMove == WHITE ? move.end() + 8 : move.end() - 8];
+        Square capturedPieceIndex = board.sideToMove == WHITE ? move.end() + 8 : move.end() - 8;
+        delete pieceWidgets[capturedPieceIndex];
+        pieceWidgets[capturedPieceIndex] = nullptr;
+    }
+    else if (move.isPromotion())
+    {
+        PieceKind promotedPiece = PieceKind::NONE;
+        switch (move.moveFlag())
+        {
+        case MoveFlag::PromotionKnight:
+            promotedPiece = PieceKind::KNIGHT;
+            break;
+        case MoveFlag::PromotionBishop:
+            promotedPiece = PieceKind::BISHOP;
+            break;
+        case MoveFlag::PromotionRook:
+            promotedPiece = PieceKind::ROOK;
+            break;
+        case MoveFlag::PromotionQueen:
+            promotedPiece = PieceKind::QUEEN;
+            break;
+        default:
+            break;
+        }
+        addPieceWidget({promotedPiece, board.sideToMove}, move.end());
+        delete pieceWidgets[move.start()];
+        pieceWidgets[move.start()] = nullptr;
     }
 
-    pieceWidgets[move.end()] = pieceWidgets[move.start()];
-    pieceWidgets[move.start()] = nullptr;
-    pieceWidgets[move.end()]->move(boardIndexToCoordinates(move.end()));
-    // Move rook if castling
+    if (!move.isPromotion())
+    {
+        pieceWidgets[move.end()] = pieceWidgets[move.start()];
+        pieceWidgets[move.end()]->move(boardIndexToCoordinates(move.end()));
+        pieceWidgets[move.start()] = nullptr;
+    }
 
+
+    // Move rook if castling
     if (board.sideToMove == WHITE)
     {
         const Square a1 = square::fromString("a1");
@@ -204,17 +230,23 @@ void BoardWidget::movePieceWidgets(const Move& move)
             pieceWidgets[a8] = nullptr;
         }
     }
-
-    // TODO: Promotion
 }
 
 Move BoardWidget::getMoveFromIndexes(Square start, Square end) const
 {
     MoveFlag moveFlag = MoveFlag::None;
+    const bool isPawn = board[start].kind == PieceKind::PAWN;
+    const bool isWhitePromotion = isPawn && square::rank(end) == 8 && board.sideToMove == WHITE;
+    const bool isBlackPromotion = isPawn && square::rank(end) == 1 && board.sideToMove == BLACK;
     // En Passant
-    if (board[start].kind == PieceKind::PAWN && end == board.getEnPassantTargetSquare())
+    if (isPawn && end == board.getEnPassantTargetSquare())
     {
         moveFlag = MoveFlag::EnPassant;
+    }
+    // Promotion
+    else if (isWhitePromotion || isBlackPromotion)
+    {
+        moveFlag = static_cast<MoveFlag>(promotionSelector->exec());
     }
     // Castling
     else if (board[start].kind == PieceKind::KING)
@@ -247,4 +279,19 @@ Move BoardWidget::getMoveFromIndexes(Square start, Square end) const
         }
     }
     return Move{start, end, moveFlag};
+}
+
+void BoardWidget::addPieceWidget(Piece piece, Square position)
+{
+    QString fileName = QString::fromStdString(piece.toString()).toLower() + ".svg";
+    if (piece.color == WHITE)
+    {
+        fileName.prepend("_");
+    }
+    fileName.prepend("pieces/");
+    auto* pieceWidget = new QSvgWidget(fileName, this);
+    pieceWidgets[position] = pieceWidget;
+    const auto [x, y] = boardIndexToCoordinates(position);
+    pieceWidget->setGeometry(x, y, squareSize, squareSize);
+    pieceWidget->show();
 }

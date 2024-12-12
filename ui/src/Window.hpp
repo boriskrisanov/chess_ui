@@ -2,7 +2,9 @@
 
 #include <iostream>
 #include <QApplication>
+#include <QResizeEvent>
 #include "BoardWidget.hpp"
+#include "PromotionSelector.hpp"
 
 class Window : public QWidget
 {
