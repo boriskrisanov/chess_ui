@@ -101,12 +101,36 @@ void BoardWidget::mouseReleaseEvent(QMouseEvent* event)
         return;
     }
 
-    const Move move = getMoveFromIndexes(moveStartIndex, newIndex);
+    MoveFlag promotionFlag = MoveFlag::None;
+    const bool isPawn = board[moveStartIndex].kind == PieceKind::PAWN;
+    const bool isWhitePromotion = isPawn && square::rank(newIndex) == 8 && board.sideToMove == WHITE;
+    const bool isBlackPromotion = isPawn && square::rank(newIndex) == 1 && board.sideToMove == BLACK;
+
+    // Promotion
+    if (isWhitePromotion || isBlackPromotion)
+    {
+        promotionFlag = static_cast<MoveFlag>(promotionSelector->exec());
+        if (promotionFlag == MoveFlag::None)
+        {
+            // Dialog was closed, cancel move
+            pieceWidgets[moveStartIndex]->move(boardIndexToCoordinates(moveStartIndex));
+            isPieceBeingMoved = false;
+            repaint();
+            return;
+        }
+    }
+
+    const Move move = getMoveFromIndexes(moveStartIndex, newIndex, promotionFlag);
 
     movePieceWidgets(move);
     board.makeMove(move);
     updateLegalMoves();
     repaint();
+
+    if (board.isStalemate())
+    {
+        gameEndDialog->exec();
+    }
 
     // TODO: Do this is in a separate thread so the app doesn't freeze
     SearchResult searchResult = timeLimitedSearch(board, static_cast<std::chrono::milliseconds>(1000));
@@ -232,21 +256,13 @@ void BoardWidget::movePieceWidgets(const Move& move)
     }
 }
 
-Move BoardWidget::getMoveFromIndexes(Square start, Square end) const
+Move BoardWidget::getMoveFromIndexes(Square start, Square end, MoveFlag promotion) const
 {
-    MoveFlag moveFlag = MoveFlag::None;
-    const bool isPawn = board[start].kind == PieceKind::PAWN;
-    const bool isWhitePromotion = isPawn && square::rank(end) == 8 && board.sideToMove == WHITE;
-    const bool isBlackPromotion = isPawn && square::rank(end) == 1 && board.sideToMove == BLACK;
+    MoveFlag moveFlag = promotion; // Will be NONE by default
     // En Passant
-    if (isPawn && end == board.getEnPassantTargetSquare())
+    if (board[start].kind == PieceKind::PAWN && end == board.getEnPassantTargetSquare())
     {
         moveFlag = MoveFlag::EnPassant;
-    }
-    // Promotion
-    else if (isWhitePromotion || isBlackPromotion)
-    {
-        moveFlag = static_cast<MoveFlag>(promotionSelector->exec());
     }
     // Castling
     else if (board[start].kind == PieceKind::KING)

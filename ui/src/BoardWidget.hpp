@@ -2,6 +2,7 @@
 
 #include <QSvgWidget>
 #include "Board.hpp"
+#include "GameEndDialog.hpp"
 #include "PromotionSelector.hpp"
 
 #include "search.hpp"
@@ -23,7 +24,7 @@ private:
     QPoint boardIndexToCoordinates(int index) const;
     void updateLegalMoves();
     void movePieceWidgets(const Move& move);
-    Move getMoveFromIndexes(Square start, Square end) const;
+    Move getMoveFromIndexes(Square start, Square end, MoveFlag promotion) const;
     void addPieceWidget(Piece piece, Square position);
 
     const QColor lightSquareColor{240, 217, 181};
@@ -39,4 +40,5 @@ private:
     Piece pieceBeingMoved;
 
     PromotionSelector* promotionSelector = new PromotionSelector(this);
+    GameEndDialog* gameEndDialog = new GameEndDialog(this);
 };
