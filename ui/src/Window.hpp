@@ -20,6 +20,7 @@ public:
     {
         board->resize(event->size());
         board->repaint();
+        board->drawPieces();
     }
 
 private:

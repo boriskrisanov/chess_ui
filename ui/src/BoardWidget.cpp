@@ -2,6 +2,7 @@
 #include <QSvgWidget>
 #include <QPainter>
 #include <QMouseEvent>
+#include <search.hpp>
 
 BoardWidget::BoardWidget(QWidget* parent)
     : QWidget(parent)
@@ -9,23 +10,12 @@ BoardWidget::BoardWidget(QWidget* parent)
     board.loadFen("8/1k4P1/8/1K6/8/8/8/8 w - - 0 1");
     // board.loadFen(STARTING_POSITION_FEN);
     updateLegalMoves();
-
-    for (int i = 0; i < 8; i++)
-    {
-        for (int j = 0; j < 8; j++)
-        {
-            const int index = 8 * i + j;
-            if (board.isSquareEmpty(index))
-            {
-                continue;
-            }
-            addPieceWidget(board[index], index);
-        }
-    }
+    drawPieces();
 }
 
 void BoardWidget::paintEvent(QPaintEvent* event)
 {
+    squareSize = std::min(size().width(), size().height()) / 8;
     QPainter painter(this);
     QColor squareColor = lightSquareColor;
     for (int i = 0; i < 8; i++)
@@ -127,17 +117,18 @@ void BoardWidget::mouseReleaseEvent(QMouseEvent* event)
     updateLegalMoves();
     repaint();
 
-    if (board.isStalemate())
-    {
-        gameEndDialog->exec();
-    }
-
     // TODO: Do this is in a separate thread so the app doesn't freeze
     SearchResult searchResult = timeLimitedSearch(board, static_cast<std::chrono::milliseconds>(1000));
     movePieceWidgets(searchResult.bestMove);
     board.makeMove(searchResult.bestMove);
     updateLegalMoves();
     repaint();
+}
+
+void BoardWidget::resizeEvent(QResizeEvent* event)
+{
+    // drawPieces();
+    QWidget::resizeEvent(event);
 }
 
 int BoardWidget::coordinatesToBoardIndex(QPoint coordinates) const
@@ -310,4 +301,25 @@ void BoardWidget::addPieceWidget(Piece piece, Square position)
     const auto [x, y] = boardIndexToCoordinates(position);
     pieceWidget->setGeometry(x, y, squareSize, squareSize);
     pieceWidget->show();
+}
+
+void BoardWidget::drawPieces()
+{
+    for (int i = 0; i < 8; i++)
+    {
+        for (int j = 0; j < 8; j++)
+        {
+            const int index = 8 * i + j;
+            if (pieceWidgets[index] != nullptr)
+            {
+                delete pieceWidgets[index];
+                pieceWidgets[index] = nullptr;
+            }
+            if (board.isSquareEmpty(index))
+            {
+                continue;
+            }
+            addPieceWidget(board[index], index);
+        }
+    }
 }

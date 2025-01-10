@@ -21,7 +21,6 @@ add_executable(chess_ui_cpp src/main.cpp
         src/BoardWidget.cpp
         src/PromotionSelector.cpp
         src/PromotionSelector.hpp
-        src/GameEndDialog.hpp
 )
 
 target_link_libraries(chess_ui_cpp

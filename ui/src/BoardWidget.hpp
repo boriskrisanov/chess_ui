@@ -2,10 +2,7 @@
 
 #include <QSvgWidget>
 #include "Board.hpp"
-#include "GameEndDialog.hpp"
 #include "PromotionSelector.hpp"
-
-#include "search.hpp"
 
 class BoardWidget : public QWidget
 {
@@ -18,6 +15,8 @@ public:
     void mouseMoveEvent(QMouseEvent* event) override;
     void mousePressEvent(QMouseEvent* event) override;
     void mouseReleaseEvent(QMouseEvent* event) override;
+    void resizeEvent(QResizeEvent* event) override;
+    void drawPieces();
 
 private:
     int coordinatesToBoardIndex(QPoint coordinates) const;
@@ -31,7 +30,7 @@ private:
     const QColor darkSquareColor{181, 136, 99};
     const QColor legalMoveSquareColor{66, 135, 245};
     const QColor checkSquareColor{255, 70, 60};
-    const int squareSize = 70;
+    int squareSize = 70;
     Board board;
     std::array<QSvgWidget*, 64> pieceWidgets;
     std::array<std::vector<int>, 64> legalMoves;
@@ -40,5 +39,4 @@ private:
     Piece pieceBeingMoved;
 
     PromotionSelector* promotionSelector = new PromotionSelector(this);
-    GameEndDialog* gameEndDialog = new GameEndDialog(this);
 };
