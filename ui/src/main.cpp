@@ -1,8 +1,5 @@
-#include <QApplication>
-#include <QPushButton>
-#include <QtSvg/QtSvg>
-#include <QtSvgWidgets/QtSvgWidgets>
 #include "Window.hpp"
+#include <QApplication>
 
 int main(int argc, char* argv[])
 {
@@ -11,5 +8,5 @@ int main(int argc, char* argv[])
     Window window;
     window.show();
 
-    return app.exec();
+    return QApplication::exec();
 }

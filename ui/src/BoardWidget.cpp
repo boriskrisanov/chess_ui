@@ -7,8 +7,8 @@
 BoardWidget::BoardWidget(QWidget* parent)
     : QWidget(parent)
 {
-    board.loadFen("8/1k4P1/8/1K6/8/8/8/8 w - - 0 1");
-    // board.loadFen(STARTING_POSITION_FEN);
+    // board.loadFen("8/1k4P1/8/1K6/8/8/8/8 w - - 0 1");
+    board.loadFen(STARTING_POSITION_FEN);
     updateLegalMoves();
     drawPieces();
 }
@@ -127,7 +127,8 @@ void BoardWidget::mouseReleaseEvent(QMouseEvent* event)
 
 void BoardWidget::resizeEvent(QResizeEvent* event)
 {
-    // drawPieces();
+    repaint();
+    drawPieces();
     QWidget::resizeEvent(event);
 }
 

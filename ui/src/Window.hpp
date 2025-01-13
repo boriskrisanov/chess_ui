@@ -1,7 +1,6 @@
 #pragma once
 
 #include <iostream>
-#include <QApplication>
 #include <QResizeEvent>
 #include "BoardWidget.hpp"
 #include "PromotionSelector.hpp"
@@ -14,15 +13,11 @@ public:
     explicit Window(QWidget* parent = nullptr)
         : QWidget(parent)
     {
-    }
-
-    void resizeEvent(QResizeEvent* event) override
-    {
-        board->resize(event->size());
+        hLayout->addWidget(board);
         board->repaint();
-        board->drawPieces();
     }
 
 private:
+    QHBoxLayout* hLayout = new QHBoxLayout(this);
     BoardWidget* board = new BoardWidget(this);
 };
