@@ -4,6 +4,7 @@
 #include <QResizeEvent>
 #include "BoardWidget.hpp"
 #include "PromotionSelector.hpp"
+#include <QListWidget>
 
 class Window : public QWidget
 {
@@ -13,11 +14,13 @@ public:
     explicit Window(QWidget* parent = nullptr)
         : QWidget(parent)
     {
-        hLayout->addWidget(board);
+        hLayout->addWidget(board, 1);
+        hLayout->addWidget(moveList, 1);
         board->repaint();
     }
 
 private:
     QHBoxLayout* hLayout = new QHBoxLayout(this);
-    BoardWidget* board = new BoardWidget(this);
+    QListWidget* moveList = new QListWidget(this);
+    BoardWidget* board = new BoardWidget(moveList, this);
 };

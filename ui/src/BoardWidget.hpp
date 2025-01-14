@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QListWidget>
 #include <QSvgWidget>
 #include "Board.hpp"
 #include "PromotionSelector.hpp"
@@ -9,7 +10,7 @@ class BoardWidget : public QWidget
     Q_OBJECT
 
 public:
-    explicit BoardWidget(QWidget* parent = nullptr);
+    explicit BoardWidget(QListWidget* moveList, QWidget* parent = nullptr);
 
     void paintEvent(QPaintEvent* event) override;
     void mouseMoveEvent(QMouseEvent* event) override;
@@ -37,6 +38,7 @@ private:
     bool isPieceBeingMoved = false;
     int moveStartIndex;
     Piece pieceBeingMoved;
+    QListWidget* moveList;
 
     PromotionSelector* promotionSelector = new PromotionSelector(this);
 };

@@ -4,8 +4,8 @@
 #include <QMouseEvent>
 #include <search.hpp>
 
-BoardWidget::BoardWidget(QWidget* parent)
-    : QWidget(parent)
+BoardWidget::BoardWidget(QListWidget* moveList, QWidget* parent)
+    : moveList(moveList), QWidget(parent)
 {
     // board.loadFen("8/1k4P1/8/1K6/8/8/8/8 w - - 0 1");
     board.loadFen(STARTING_POSITION_FEN);
@@ -112,6 +112,8 @@ void BoardWidget::mouseReleaseEvent(QMouseEvent* event)
 
     const Move move = getMoveFromIndexes(moveStartIndex, newIndex, promotionFlag);
 
+    moveList->addItem(QString::fromStdString(move.getPgn(board)));
+
     movePieceWidgets(move);
     board.makeMove(move);
     updateLegalMoves();
@@ -119,6 +121,9 @@ void BoardWidget::mouseReleaseEvent(QMouseEvent* event)
 
     // TODO: Do this is in a separate thread so the app doesn't freeze
     SearchResult searchResult = timeLimitedSearch(board, static_cast<std::chrono::milliseconds>(1000));
+
+    moveList->addItem(QString::fromStdString(searchResult.bestMove.getPgn(board)));
+
     movePieceWidgets(searchResult.bestMove);
     board.makeMove(searchResult.bestMove);
     updateLegalMoves();
