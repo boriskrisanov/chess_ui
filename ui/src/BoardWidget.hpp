@@ -2,15 +2,20 @@
 
 #include <QListWidget>
 #include <QSvgWidget>
+#include <thread>
+
 #include "Board.hpp"
+#include "EngineInstance.hpp"
+#include "MoveListWidget.hpp"
 #include "PromotionSelector.hpp"
+#include "search.hpp"
 
 class BoardWidget : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit BoardWidget(QListWidget* moveList, QWidget* parent = nullptr);
+    explicit BoardWidget(MoveListWidget* moveList, EngineInstance* engineInstance, QWidget* parent = nullptr);
 
     void paintEvent(QPaintEvent* event) override;
     void mouseMoveEvent(QMouseEvent* event) override;
@@ -18,6 +23,8 @@ public:
     void mouseReleaseEvent(QMouseEvent* event) override;
     void resizeEvent(QResizeEvent* event) override;
     void drawPieces();
+public slots:
+    void onEngineSearchDone(SearchResult move);
 
 private:
     int coordinatesToBoardIndex(QPoint coordinates) const;
@@ -38,7 +45,8 @@ private:
     bool isPieceBeingMoved = false;
     int moveStartIndex;
     Piece pieceBeingMoved;
-    QListWidget* moveList;
+    MoveListWidget* moveList;
+    EngineInstance* engineInstance;
 
     PromotionSelector* promotionSelector = new PromotionSelector(this);
 };

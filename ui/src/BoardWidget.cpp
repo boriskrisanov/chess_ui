@@ -4,8 +4,8 @@
 #include <QMouseEvent>
 #include <search.hpp>
 
-BoardWidget::BoardWidget(QListWidget* moveList, QWidget* parent)
-    : moveList(moveList), QWidget(parent)
+BoardWidget::BoardWidget(MoveListWidget* moveList, EngineInstance* engineInstance, QWidget* parent)
+    : QWidget(parent), moveList(moveList), engineInstance(engineInstance)
 {
     // board.loadFen("8/1k4P1/8/1K6/8/8/8/8 w - - 0 1");
     board.loadFen(STARTING_POSITION_FEN);
@@ -112,22 +112,16 @@ void BoardWidget::mouseReleaseEvent(QMouseEvent* event)
 
     const Move move = getMoveFromIndexes(moveStartIndex, newIndex, promotionFlag);
 
-    moveList->addItem(QString::fromStdString(move.getPgn(board)));
+    moveList->addMove(move, board);
 
     movePieceWidgets(move);
     board.makeMove(move);
     updateLegalMoves();
     repaint();
 
-    // TODO: Do this is in a separate thread so the app doesn't freeze
-    SearchResult searchResult = timeLimitedSearch(board, static_cast<std::chrono::milliseconds>(1000));
+    engineInstance->startSearch(board, std::chrono::milliseconds(1000));
 
-    moveList->addItem(QString::fromStdString(searchResult.bestMove.getPgn(board)));
-
-    movePieceWidgets(searchResult.bestMove);
-    board.makeMove(searchResult.bestMove);
-    updateLegalMoves();
-    repaint();
+    // moveList->addMove(move, board);
 }
 
 void BoardWidget::resizeEvent(QResizeEvent* event)
@@ -307,6 +301,16 @@ void BoardWidget::addPieceWidget(Piece piece, Square position)
     const auto [x, y] = boardIndexToCoordinates(position);
     pieceWidget->setGeometry(x, y, squareSize, squareSize);
     pieceWidget->show();
+}
+
+void BoardWidget::onEngineSearchDone(SearchResult move)
+{
+    movePieceWidgets(move.bestMove);
+    moveList->addMove(move.bestMove, board);
+    board.makeMove(move.bestMove);
+    updateLegalMoves();
+    repaint();
+
 }
 
 void BoardWidget::drawPieces()

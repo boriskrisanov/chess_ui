@@ -6,6 +6,9 @@
 #include "PromotionSelector.hpp"
 #include <QListWidget>
 
+#include "EngineInstance.hpp"
+#include "MoveListWidget.hpp"
+
 class Window : public QWidget
 {
     Q_OBJECT
@@ -17,10 +20,13 @@ public:
         hLayout->addWidget(board, 1);
         hLayout->addWidget(moveList, 1);
         board->repaint();
+
+        connect(engineInstance, &EngineInstance::searchDone, board, &BoardWidget::onEngineSearchDone);
     }
 
 private:
     QHBoxLayout* hLayout = new QHBoxLayout(this);
-    QListWidget* moveList = new QListWidget(this);
-    BoardWidget* board = new BoardWidget(moveList, this);
+    MoveListWidget* moveList = new MoveListWidget(this);
+    EngineInstance* engineInstance = new EngineInstance();
+    BoardWidget* board = new BoardWidget(moveList, engineInstance, this);
 };

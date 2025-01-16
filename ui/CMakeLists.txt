@@ -21,6 +21,9 @@ add_executable(chess_ui_cpp src/main.cpp
         src/BoardWidget.cpp
         src/PromotionSelector.cpp
         src/PromotionSelector.hpp
+        src/MoveListWidget.hpp
+        src/MoveListWidget.cpp
+        src/EngineInstance.hpp
 )
 
 target_link_libraries(chess_ui_cpp
