@@ -23,6 +23,15 @@ public:
     void mouseReleaseEvent(QMouseEvent* event) override;
     void resizeEvent(QResizeEvent* event) override;
     void drawPieces();
+    int heightForWidth(int w) const override
+    {
+        return w;
+    }
+    bool hasHeightForWidth() const override
+    {
+        return true;
+    }
+
 public slots:
     void onEngineSearchDone(SearchResult move);
 
@@ -38,7 +47,7 @@ private:
     const QColor darkSquareColor{181, 136, 99};
     const QColor legalMoveSquareColor{66, 135, 245};
     const QColor checkSquareColor{255, 70, 60};
-    int squareSize = 70;
+    int squareSize;
     Board board;
     std::array<QSvgWidget*, 64> pieceWidgets;
     std::array<std::vector<int>, 64> legalMoves;

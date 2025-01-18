@@ -24,6 +24,8 @@ add_executable(chess_ui_cpp src/main.cpp
         src/MoveListWidget.hpp
         src/MoveListWidget.cpp
         src/EngineInstance.hpp
+        src/GameControlsWidget.hpp
+        src/EngineInfoWidget.hpp
 )
 
 target_link_libraries(chess_ui_cpp

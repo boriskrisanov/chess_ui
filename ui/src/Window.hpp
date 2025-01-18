@@ -1,12 +1,13 @@
 #pragma once
 
-#include <iostream>
 #include <QResizeEvent>
 #include "BoardWidget.hpp"
 #include "PromotionSelector.hpp"
 #include <QListWidget>
+#include <QLabel>
 
 #include "EngineInstance.hpp"
+#include "GameControlsWidget.hpp"
 #include "MoveListWidget.hpp"
 
 class Window : public QWidget
@@ -17,16 +18,18 @@ public:
     explicit Window(QWidget* parent = nullptr)
         : QWidget(parent)
     {
-        hLayout->addWidget(board, 1);
-        hLayout->addWidget(moveList, 1);
+        board->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+        hLayout->addWidget(board);
+        hLayout->addWidget(gameControls);
         board->repaint();
+        setLayout(hLayout);
 
         connect(engineInstance, &EngineInstance::searchDone, board, &BoardWidget::onEngineSearchDone);
     }
 
 private:
-    QHBoxLayout* hLayout = new QHBoxLayout(this);
-    MoveListWidget* moveList = new MoveListWidget(this);
     EngineInstance* engineInstance = new EngineInstance();
-    BoardWidget* board = new BoardWidget(moveList, engineInstance, this);
+    QHBoxLayout* hLayout = new QHBoxLayout(this);
+    GameControlsWidget* gameControls = new GameControlsWidget();
+    BoardWidget* board = new BoardWidget(gameControls->getMoveList(), engineInstance, this);
 };
