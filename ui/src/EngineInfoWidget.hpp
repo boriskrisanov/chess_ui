@@ -10,10 +10,8 @@ public:
     explicit EngineInfoWidget(QWidget* parent = nullptr)
         : QWidget(parent)
     {
-        // checkbox->show();
-        label->setVisible(true);
+        // TODO
     }
 private:
-    QLabel* label = new QLabel("a", this);
     QCheckBox* checkbox = new QCheckBox("Show engine info", this);
 };

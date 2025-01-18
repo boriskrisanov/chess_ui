@@ -17,4 +17,5 @@ void MoveListWidget::addMove(Move move, Board boardBeforeMove)
         currentRow->setText(currentRow->text() + " " + QString::fromStdString(movePgn));
     }
     moveCount++;
+    scrollToBottom();
 }
