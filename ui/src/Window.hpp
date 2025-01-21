@@ -19,17 +19,21 @@ public:
         : QWidget(parent)
     {
         board->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-        hLayout->addWidget(board);
-        hLayout->addWidget(gameControls);
+        hLayout->setAlignment(Qt::AlignCenter);
+        hLayout->addWidget(moveList, 2);
+        hLayout->addWidget(board, 5);
+        hLayout->addWidget(gameControls, 2);
         board->repaint();
         setLayout(hLayout);
 
         connect(engineInstance, &EngineInstance::searchDone, board, &BoardWidget::onEngineSearchDone);
+        connect(engineInstance, &EngineInstance::searchDone, gameControls->getEngineInfoWidget(), &EngineInfoWidget::onSearchDone);
     }
 
 private:
     EngineInstance* engineInstance = new EngineInstance();
     QHBoxLayout* hLayout = new QHBoxLayout(this);
     GameControlsWidget* gameControls = new GameControlsWidget();
-    BoardWidget* board = new BoardWidget(gameControls->getMoveList(), engineInstance, this);
+    MoveListWidget* moveList = new MoveListWidget();
+    BoardWidget* board = new BoardWidget(moveList, engineInstance, this);
 };

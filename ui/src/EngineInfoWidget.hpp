@@ -10,8 +10,24 @@ public:
     explicit EngineInfoWidget(QWidget* parent = nullptr)
         : QWidget(parent)
     {
-        // TODO
+        hLayout->addWidget(evalText);
+    }
+public slots:
+    void onSearchDone(SearchResult searchResult)
+    {
+        evalText->setText(QString::fromStdString("Eval = " + formatEval(searchResult.standardEval())));
     }
 private:
-    QCheckBox* checkbox = new QCheckBox("Show engine info", this);
+    std::string formatEval(double eval)
+    {
+        std::string evalString = QString::number(eval, 'g', 3).toStdString();
+        if (eval > 0)
+        {
+            evalString = "+" + evalString;
+        }
+        return evalString;
+    }
+
+    QHBoxLayout* hLayout = new QHBoxLayout(this);
+    QLabel* evalText = new QLabel();
 };
