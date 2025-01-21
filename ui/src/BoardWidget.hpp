@@ -57,5 +57,9 @@ private:
     MoveListWidget* moveList;
     EngineInstance* engineInstance;
 
+    bool flipBoard = false;
+    PieceColor playerSide = WHITE;
+    uint32_t searchTime = 1000;
+
     PromotionSelector* promotionSelector = new PromotionSelector(this);
 };

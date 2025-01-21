@@ -10,12 +10,12 @@
 #include "GameControlsWidget.hpp"
 #include "MoveListWidget.hpp"
 
-class Window : public QWidget
+class GameWidget : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit Window(QWidget* parent = nullptr)
+    explicit GameWidget(QWidget* parent = nullptr)
         : QWidget(parent)
     {
         board->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);

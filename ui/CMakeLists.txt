@@ -16,7 +16,7 @@ find_package(Qt6Svg CONFIG REQUIRED)
 find_package(Qt6SvgWidgets CONFIG REQUIRED)
 
 add_executable(chess_ui_cpp src/main.cpp
-        src/Window.hpp
+        src/GameWidget.hpp
         src/BoardWidget.hpp
         src/BoardWidget.cpp
         src/PromotionSelector.cpp
@@ -26,6 +26,8 @@ add_executable(chess_ui_cpp src/main.cpp
         src/EngineInstance.hpp
         src/GameControlsWidget.hpp
         src/EngineInfoWidget.hpp
+        src/MainWindow.hpp
+        src/GameOptionsWidget.hpp
 )
 
 target_link_libraries(chess_ui_cpp

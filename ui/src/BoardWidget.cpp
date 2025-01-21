@@ -7,8 +7,18 @@
 BoardWidget::BoardWidget(MoveListWidget* moveList, EngineInstance* engineInstance, QWidget* parent)
     : QWidget(parent), moveList(moveList), engineInstance(engineInstance)
 {
-    // board.loadFen("8/1k4P1/8/1K6/8/8/8/8 w - - 0 1");
-    board.loadFen(STARTING_POSITION_FEN);
+    board.loadFen("8/1k4P1/8/1K6/8/8/8/8 w - - 0 1");
+    // board.loadFen(STARTING_POSITION_FEN);
+
+    if (playerSide == BLACK)
+    {
+        flipBoard = true;
+    }
+    if (board.sideToMove != playerSide)
+    {
+        engineInstance->startSearch(board, std::chrono::milliseconds(searchTime));
+    }
+
     updateLegalMoves();
     drawPieces();
 }
@@ -17,12 +27,16 @@ void BoardWidget::paintEvent(QPaintEvent* event)
 {
     squareSize = std::min(size().width(), size().height()) / 8;
     QPainter painter(this);
-    QColor squareColor = lightSquareColor;
+    QColor squareColor = flipBoard ? darkSquareColor : lightSquareColor;
     for (int i = 0; i < 8; i++)
     {
         for (int j = 0; j < 8; j++)
         {
-            const int index = 8 * i + j;
+            int index = 8 * i + j;
+            if (flipBoard)
+            {
+                index = 63 - index;
+            }
             squareColor = squareColor == lightSquareColor ? darkSquareColor : lightSquareColor;
             QRect square(j * squareSize, i * squareSize, squareSize, squareSize);
             painter.fillRect(square, squareColor);
@@ -64,7 +78,7 @@ void BoardWidget::mousePressEvent(QMouseEvent* event)
         return;
     }
     const int index = coordinatesToBoardIndex(event->pos());
-    if (board[index].isNone())
+    if (board[index].isNone() || board[index].color != playerSide)
     {
         return;
     }
@@ -119,7 +133,7 @@ void BoardWidget::mouseReleaseEvent(QMouseEvent* event)
     updateLegalMoves();
     repaint();
 
-    engineInstance->startSearch(board, std::chrono::milliseconds(1000));
+    engineInstance->startSearch(board, std::chrono::milliseconds(searchTime));
 
     // moveList->addMove(move, board);
 }
@@ -136,13 +150,24 @@ int BoardWidget::coordinatesToBoardIndex(QPoint coordinates) const
     int file = std::floor(coordinates.x() / static_cast<double>(squareSize));
     int rank = std::floor(coordinates.y() / static_cast<double>(squareSize));
 
+    if (flipBoard)
+    {
+        file = 7 - file;
+        rank = 7 - rank;
+    }
+
     return 8 * rank + file;
 }
 
 QPoint BoardWidget::boardIndexToCoordinates(int index) const
 {
-    const int file = index % 8;
-    const int rank = std::floor(index / 8);
+    int file = index % 8;
+    int rank = std::floor(index / 8);
+    if (flipBoard)
+    {
+        file = 7 - file;
+        rank = 7 - rank;
+    }
 
     return {squareSize * file, squareSize * rank};
 }
@@ -310,7 +335,6 @@ void BoardWidget::onEngineSearchDone(SearchResult move)
     board.makeMove(move.bestMove);
     updateLegalMoves();
     repaint();
-
 }
 
 void BoardWidget::drawPieces()
