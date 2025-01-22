@@ -17,7 +17,7 @@ void BoardWidget::paintEvent(QPaintEvent* event)
 {
     squareSize = std::min(size().width(), size().height()) / 8;
     QPainter painter(this);
-    QColor squareColor = flipBoard ? darkSquareColor : lightSquareColor;
+    QColor squareColor = flipBoard ? lightSquareColor : darkSquareColor;
     for (int i = 0; i < 8; i++)
     {
         for (int j = 0; j < 8; j++)
