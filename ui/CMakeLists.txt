@@ -28,6 +28,7 @@ add_executable(chess_ui_cpp src/main.cpp
         src/EngineInfoWidget.hpp
         src/MainWindow.hpp
         src/GameOptionsWidget.hpp
+        src/GameOptions.hpp
 )
 
 target_link_libraries(chess_ui_cpp

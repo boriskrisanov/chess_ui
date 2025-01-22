@@ -4,23 +4,13 @@
 #include <QMouseEvent>
 #include <search.hpp>
 
-BoardWidget::BoardWidget(MoveListWidget* moveList, EngineInstance* engineInstance, QWidget* parent)
-    : QWidget(parent), moveList(moveList), engineInstance(engineInstance)
+#include "GameOptions.hpp"
+
+BoardWidget::BoardWidget(MoveListWidget* moveList, EngineInstance* engineInstance, PieceColor playerSide, std::string startingFen, QWidget* parent)
+    : QWidget(parent), moveList(moveList), engineInstance(engineInstance), playerSide(playerSide)
 {
-    board.loadFen("8/1k4P1/8/1K6/8/8/8/8 w - - 0 1");
-    // board.loadFen(STARTING_POSITION_FEN);
-
-    if (playerSide == BLACK)
-    {
-        flipBoard = true;
-    }
-    if (board.sideToMove != playerSide)
-    {
-        engineInstance->startSearch(board, std::chrono::milliseconds(searchTime));
-    }
-
-    updateLegalMoves();
-    drawPieces();
+    // board.loadFen("8/1k4P1/8/1K6/8/8/8/8 w - - 0 1");
+    newGame(startingFen, playerSide);
 }
 
 void BoardWidget::paintEvent(QPaintEvent* event)
@@ -133,7 +123,7 @@ void BoardWidget::mouseReleaseEvent(QMouseEvent* event)
     updateLegalMoves();
     repaint();
 
-    engineInstance->startSearch(board, std::chrono::milliseconds(searchTime));
+    engineInstance->startSearch(board);
 
     // moveList->addMove(move, board);
 }

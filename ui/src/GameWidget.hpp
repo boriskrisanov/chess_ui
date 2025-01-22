@@ -8,6 +8,7 @@
 
 #include "EngineInstance.hpp"
 #include "GameControlsWidget.hpp"
+#include "GameOptions.hpp"
 #include "MoveListWidget.hpp"
 
 class GameWidget : public QWidget
@@ -30,10 +31,16 @@ public:
         connect(engineInstance, &EngineInstance::searchDone, gameControls->getEngineInfoWidget(), &EngineInfoWidget::onSearchDone);
     }
 
+public slots:
+    void gameStarted(GameOptions gameOptions)
+    {
+        board->newGame(gameOptions.startingFen, gameOptions.playerSide);
+    }
+
 private:
     EngineInstance* engineInstance = new EngineInstance();
     QHBoxLayout* hLayout = new QHBoxLayout(this);
     GameControlsWidget* gameControls = new GameControlsWidget();
     MoveListWidget* moveList = new MoveListWidget();
-    BoardWidget* board = new BoardWidget(moveList, engineInstance, this);
+    BoardWidget* board = new BoardWidget(moveList, engineInstance, WHITE, STARTING_POSITION_FEN, this);
 };

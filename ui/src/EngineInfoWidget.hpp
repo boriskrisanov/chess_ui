@@ -11,9 +11,11 @@ public:
     explicit EngineInfoWidget(QWidget* parent = nullptr)
         : QWidget(parent)
     {
-        hLayout->addWidget(evalText);
-        hLayout->addWidget(depthText);
-        hLayout->addWidget(positionsEvaluatedText);
+        groupBoxVLayout->addWidget(evalText);
+        groupBoxVLayout->addWidget(depthText);
+        groupBoxVLayout->addWidget(positionsEvaluatedText);
+        groupBox->setLayout(groupBoxVLayout);
+        vLayout->addWidget(groupBox);
     }
 public slots:
     void onSearchDone(SearchResult searchResult) const
@@ -33,7 +35,8 @@ private:
         return evalString;
     }
 
-    QVBoxLayout* hLayout = new QVBoxLayout(this);
+    QVBoxLayout* vLayout = new QVBoxLayout(this);
+    QVBoxLayout* groupBoxVLayout = new QVBoxLayout();
     QGroupBox* groupBox = new QGroupBox("Engine Info");
     QLabel* evalText = new QLabel();
     QLabel* depthText = new QLabel();

@@ -6,6 +6,7 @@
 
 #include "Board.hpp"
 #include "EngineInstance.hpp"
+#include "GameOptions.hpp"
 #include "MoveListWidget.hpp"
 #include "PromotionSelector.hpp"
 #include "search.hpp"
@@ -15,7 +16,7 @@ class BoardWidget : public QWidget
     Q_OBJECT
 
 public:
-    explicit BoardWidget(MoveListWidget* moveList, EngineInstance* engineInstance, QWidget* parent = nullptr);
+    explicit BoardWidget(MoveListWidget* moveList, EngineInstance* engineInstance, PieceColor playerSide, std::string startingFen, QWidget* parent = nullptr);
 
     void paintEvent(QPaintEvent* event) override;
     void mouseMoveEvent(QMouseEvent* event) override;
@@ -30,6 +31,24 @@ public:
     bool hasHeightForWidth() const override
     {
         return true;
+    }
+
+    void newGame(std::string fen, PieceColor playerSide)
+    {
+        board.loadFen(fen);
+        this->playerSide = playerSide;
+
+        if (playerSide == BLACK)
+        {
+            flipBoard = true;
+        }
+        if (board.sideToMove != playerSide)
+        {
+            engineInstance->startSearch(board);
+        }
+
+        updateLegalMoves();
+        drawPieces();
     }
 
 public slots:
@@ -59,7 +78,6 @@ private:
 
     bool flipBoard = false;
     PieceColor playerSide = WHITE;
-    uint32_t searchTime = 1000;
 
     PromotionSelector* promotionSelector = new PromotionSelector(this);
 };
