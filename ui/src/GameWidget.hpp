@@ -29,11 +29,14 @@ public:
 
         connect(engineInstance, &EngineInstance::searchDone, board, &BoardWidget::onEngineSearchDone);
         connect(engineInstance, &EngineInstance::searchDone, gameControls->getEngineInfoWidget(), &EngineInfoWidget::onSearchDone);
+        connect(gameControls, &GameControlsWidget::flipBoard, board, &BoardWidget::flipBoardSlot);
     }
 
 public slots:
-    void gameStarted(GameOptions gameOptions)
+    void gameStarted(GameOptions gameOptions) const
     {
+        engineInstance->setSearchTime(gameOptions.searchTime);
+        resizeTranspositionTable(gameOptions.transpositionTableSizeMB);
         board->newGame(gameOptions.startingFen, gameOptions.playerSide);
     }
 

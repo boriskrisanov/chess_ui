@@ -53,6 +53,7 @@ public:
 
 public slots:
     void onEngineSearchDone(SearchResult move);
+    void flipBoardSlot();
 
 private:
     int coordinatesToBoardIndex(QPoint coordinates) const;

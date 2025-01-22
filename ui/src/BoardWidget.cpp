@@ -327,6 +327,13 @@ void BoardWidget::onEngineSearchDone(SearchResult move)
     repaint();
 }
 
+void BoardWidget::flipBoardSlot()
+{
+    flipBoard = !flipBoard;
+    repaint();
+    drawPieces();
+}
+
 void BoardWidget::drawPieces()
 {
     for (int i = 0; i < 8; i++)

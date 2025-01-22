@@ -20,6 +20,7 @@ public:
 
         vLayout->addWidget(backButton);
         vLayout->addWidget(forwardButton);
+        vLayout->addWidget(flipBoardButton);
         vLayout->addWidget(endGameButton);
         vLayout->addWidget(copyPgnButton);
 
@@ -29,6 +30,7 @@ public:
         // engineInfoWidget->hide();
 
         connect(copyPgnButton, SIGNAL (clicked(bool)), this, SLOT (copyPgnClicked()));
+        connect(flipBoardButton, SIGNAL (clicked(bool)), this, SLOT (flipBoardButtonClicked()));
     }
 
     // TODO: Forward signals from engine instance?
@@ -46,9 +48,17 @@ private:
 
     QPushButton* backButton = new QPushButton("<");
     QPushButton* forwardButton = new QPushButton(">");
+    QPushButton* flipBoardButton = new QPushButton("Flip Board");
     QPushButton* endGameButton = new QPushButton("End Game");
     QPushButton* copyPgnButton = new QPushButton("Copy PGN");
+signals:
+    void flipBoard();
 private slots:
+    void flipBoardButtonClicked()
+    {
+        emit flipBoard();
+    }
+
     void copyPgnClicked() const
     {
         // if (moveList->count() == 0)
