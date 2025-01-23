@@ -33,6 +33,9 @@ public:
 
         connect(gameControls, &GameControlsWidget::undoMove, board, &BoardWidget::onUndoMove);
         connect(gameControls, SIGNAL(redoMove()), board, SLOT(onRedoMove()));
+
+        connect(board, SIGNAL(setUndoMoveEnabled(bool)), gameControls, SLOT(setUndoMoveEnabled(bool)));
+        connect(board, SIGNAL(setRedoMoveEnabled(bool)), gameControls, SLOT(setRedoMoveEnabled(bool)));
     }
 
 public slots:

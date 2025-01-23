@@ -30,6 +30,9 @@ public:
 
         // engineInfoWidget->hide();
 
+        backButton->setEnabled(false);
+        forwardButton->setEnabled(false);
+
         connect(copyPgnButton, SIGNAL(clicked(bool)), this, SLOT(copyPgnClicked()));
         connect(flipBoardButton, SIGNAL(clicked(bool)), this, SLOT(flipBoardButtonClicked()));
         connect(backButton, SIGNAL(clicked(bool)), this, SLOT(undoMoveButtonClicked()));
@@ -40,6 +43,17 @@ public:
     EngineInfoWidget* getEngineInfoWidget() const
     {
         return engineInfoWidget;
+    }
+
+public slots:
+    void setUndoMoveEnabled(bool enabled) const
+    {
+        backButton->setEnabled(enabled);
+    }
+
+    void setRedoMoveEnabled(bool enabled) const
+    {
+        forwardButton->setEnabled(enabled);
     }
 
 private:

@@ -51,6 +51,10 @@ public:
         drawPieces();
     }
 
+signals:
+    void setUndoMoveEnabled(bool);
+    void setRedoMoveEnabled(bool);
+
 public slots:
     void onEngineSearchDone(SearchResult move);
     void onUndoMove();
@@ -65,6 +69,7 @@ private:
     void undoMovePieceWidgets(Board boardAfterMoveUndone, const Move& move);
     Move getMoveFromIndexes(Square start, Square end, MoveFlag promotion) const;
     void addPieceWidget(Piece piece, Square position);
+    void animatePieceMovement(Square pieceIndex, Square start, Square end) const;
 
     std::stack<Move> undoneMoves;
 
