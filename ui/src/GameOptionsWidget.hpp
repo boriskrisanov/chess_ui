@@ -108,8 +108,8 @@ private slots:
         // TODO: Validate FEN
 
         GameOptions gameOptions{
-            16 * engineLevel,
-            std::chrono::milliseconds(500 * engineLevel),
+            32 * engineLevel,
+            std::chrono::milliseconds(250 * engineLevel),
             playerSide,
             fenInput->text().isEmpty() ? STARTING_POSITION_FEN : fenInput->text().toStdString()
         };

@@ -33,7 +33,7 @@ public:
     }
 
 public slots:
-    void gameStarted(GameOptions gameOptions) const
+    void gameStarted(GameOptions gameOptions)
     {
         engineInstance->setSearchTime(gameOptions.searchTime);
         resizeTranspositionTable(gameOptions.transpositionTableSizeMB);

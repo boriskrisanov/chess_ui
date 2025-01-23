@@ -34,5 +34,6 @@ private slots:
     {
         gameOptionsWidget->hide();
         gameWidget->show();
+        setWindowState(Qt::WindowMaximized);
     }
 };

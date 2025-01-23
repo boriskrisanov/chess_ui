@@ -46,8 +46,8 @@ public:
         {
             engineInstance->startSearch(board);
         }
-
         updateLegalMoves();
+        repaint();
         drawPieces();
     }
 
@@ -59,7 +59,7 @@ private:
     int coordinatesToBoardIndex(QPoint coordinates) const;
     QPoint boardIndexToCoordinates(int index) const;
     void updateLegalMoves();
-    void movePieceWidgets(const Move& move);
+    void movePieceWidgets(const Move& move, bool animate);
     Move getMoveFromIndexes(Square start, Square end, MoveFlag promotion) const;
     void addPieceWidget(Piece piece, Square position);
 

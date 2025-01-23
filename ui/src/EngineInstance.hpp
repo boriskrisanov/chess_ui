@@ -11,11 +11,13 @@ class EngineInstance : public QObject
     Q_OBJECT
 
 public:
-    void startSearch(Board& board)
+    void startSearch(const Board& board)
     {
-        std::thread thread{[this, &board]
+        // Make copy of board so that the search doesn't modify the original while the widget is rendering
+        this->board = board;
+        std::thread thread{[this]
             {
-                emit searchDone(timeLimitedSearch(board, searchTime));
+                emit searchDone(timeLimitedSearch(this->board, searchTime));
             }
         };
         thread.detach();
@@ -28,6 +30,7 @@ public:
 
 private:
     std::chrono::milliseconds searchTime{1000};
+    Board board;
 
 signals:
     void searchDone(SearchResult searchResult);

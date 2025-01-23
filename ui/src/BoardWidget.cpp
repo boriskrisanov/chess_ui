@@ -3,6 +3,7 @@
 #include <QPainter>
 #include <QMouseEvent>
 #include <search.hpp>
+#include <QPropertyAnimation>
 
 #include "GameOptions.hpp"
 
@@ -118,7 +119,8 @@ void BoardWidget::mouseReleaseEvent(QMouseEvent* event)
 
     moveList->addMove(move, board);
 
-    movePieceWidgets(move);
+    // Don't animate user moves
+    movePieceWidgets(move, false);
     board.makeMove(move);
     updateLegalMoves();
     repaint();
@@ -174,13 +176,21 @@ void BoardWidget::updateLegalMoves()
     }
 }
 
-void BoardWidget::movePieceWidgets(const Move& move)
+void BoardWidget::movePieceWidgets(const Move& move, bool animate)
 {
     // Remove piece if it was captured
     if (pieceWidgets[move.end()] != nullptr)
     {
         delete pieceWidgets[move.end()];
         // No need to set to nullptr because it will be overwritten anyway
+    }
+    if (animate)
+    {
+        auto* animation = new QPropertyAnimation(pieceWidgets[move.start()], "pos");
+        animation->setDuration(120);
+        animation->setStartValue(boardIndexToCoordinates(move.start()));
+        animation->setEndValue(boardIndexToCoordinates(move.end()));
+        animation->start();
     }
     if (move.moveFlag() == MoveFlag::EnPassant)
     {
@@ -216,10 +226,12 @@ void BoardWidget::movePieceWidgets(const Move& move)
     if (!move.isPromotion())
     {
         pieceWidgets[move.end()] = pieceWidgets[move.start()];
-        pieceWidgets[move.end()]->move(boardIndexToCoordinates(move.end()));
         pieceWidgets[move.start()] = nullptr;
+        if (!animate)
+        {
+            pieceWidgets[move.end()]->move(boardIndexToCoordinates(move.end()));
+        }
     }
-
 
     // Move rook if castling
     if (board.sideToMove == WHITE)
@@ -320,7 +332,7 @@ void BoardWidget::addPieceWidget(Piece piece, Square position)
 
 void BoardWidget::onEngineSearchDone(SearchResult move)
 {
-    movePieceWidgets(move.bestMove);
+    movePieceWidgets(move.bestMove, true);
     moveList->addMove(move.bestMove, board);
     board.makeMove(move.bestMove);
     updateLegalMoves();
