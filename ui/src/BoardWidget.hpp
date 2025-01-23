@@ -53,6 +53,8 @@ public:
 
 public slots:
     void onEngineSearchDone(SearchResult move);
+    void onUndoMove();
+    void onRedoMove();
     void flipBoardSlot();
 
 private:
@@ -60,8 +62,11 @@ private:
     QPoint boardIndexToCoordinates(int index) const;
     void updateLegalMoves();
     void movePieceWidgets(const Move& move, bool animate);
+    void undoMovePieceWidgets(Board boardAfterMoveUndone, const Move& move);
     Move getMoveFromIndexes(Square start, Square end, MoveFlag promotion) const;
     void addPieceWidget(Piece piece, Square position);
+
+    std::stack<Move> undoneMoves;
 
     const QColor lightSquareColor{240, 217, 181};
     const QColor darkSquareColor{181, 136, 99};

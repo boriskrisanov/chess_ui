@@ -30,6 +30,9 @@ public:
         connect(engineInstance, &EngineInstance::searchDone, board, &BoardWidget::onEngineSearchDone);
         connect(engineInstance, &EngineInstance::searchDone, gameControls->getEngineInfoWidget(), &EngineInfoWidget::onSearchDone);
         connect(gameControls, &GameControlsWidget::flipBoard, board, &BoardWidget::flipBoardSlot);
+
+        connect(gameControls, &GameControlsWidget::undoMove, board, &BoardWidget::onUndoMove);
+        connect(gameControls, SIGNAL(redoMove()), board, SLOT(onRedoMove()));
     }
 
 public slots:

@@ -10,6 +10,7 @@
 class GameControlsWidget : public QWidget
 {
     Q_OBJECT
+
 public:
     explicit GameControlsWidget(QWidget* parent = nullptr)
         : QWidget(parent)
@@ -29,8 +30,10 @@ public:
 
         // engineInfoWidget->hide();
 
-        connect(copyPgnButton, SIGNAL (clicked(bool)), this, SLOT (copyPgnClicked()));
-        connect(flipBoardButton, SIGNAL (clicked(bool)), this, SLOT (flipBoardButtonClicked()));
+        connect(copyPgnButton, SIGNAL(clicked(bool)), this, SLOT(copyPgnClicked()));
+        connect(flipBoardButton, SIGNAL(clicked(bool)), this, SLOT(flipBoardButtonClicked()));
+        connect(backButton, SIGNAL(clicked(bool)), this, SLOT(undoMoveButtonClicked()));
+        connect(forwardButton, SIGNAL(clicked(bool)), this, SLOT(redoMoveButtonClicked()));
     }
 
     // TODO: Forward signals from engine instance?
@@ -38,6 +41,7 @@ public:
     {
         return engineInfoWidget;
     }
+
 private:
     QVBoxLayout* vLayout = new QVBoxLayout(this);
     QLabel* player1Text = new QLabel("Computer");
@@ -53,10 +57,23 @@ private:
     QPushButton* copyPgnButton = new QPushButton("Copy PGN");
 signals:
     void flipBoard();
+    void undoMove();
+    void redoMove();
+
 private slots:
     void flipBoardButtonClicked()
     {
         emit flipBoard();
+    }
+
+    void undoMoveButtonClicked()
+    {
+        emit undoMove();
+    }
+
+    void redoMoveButtonClicked()
+    {
+        emit redoMove();
     }
 
     void copyPgnClicked() const

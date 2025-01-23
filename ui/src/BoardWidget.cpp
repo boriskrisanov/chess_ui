@@ -274,6 +274,75 @@ void BoardWidget::movePieceWidgets(const Move& move, bool animate)
     }
 }
 
+// Move must have been made for capturedPiece to be set
+void BoardWidget::undoMovePieceWidgets(const Board boardAfterMoveUndone, const Move& move)
+{
+    pieceWidgets[move.start()] = pieceWidgets[move.end()];
+    pieceWidgets[move.start()]->move(boardIndexToCoordinates(move.end())); // Will be moved by animation later
+    pieceWidgets[move.end()] = nullptr;
+    if (move.isPromotion())
+    {
+        // Add piece on end square because movement back to original square will be animated later
+        // addPieceWidget(boardAfterMoveUndone[move.start()], move.end());
+    }
+    auto* animation = new QPropertyAnimation(pieceWidgets[move.start()], "pos");
+    animation->setDuration(120);
+    animation->setStartValue(boardIndexToCoordinates(move.end()));
+    animation->setEndValue(boardIndexToCoordinates(move.start()));
+    animation->start();
+
+    // delete pieceWidgets[move.end()];
+    // pieceWidgets[move.end()] = nullptr;
+
+    // TODO: EP
+    // Restore captured piece
+    auto capturedPiece = boardAfterMoveUndone[move.end()];
+    if (capturedPiece.kind != PieceKind::NONE)
+    {
+        addPieceWidget(capturedPiece, move.end());
+    }
+
+    // Move rook if castling
+    if (board.sideToMove == WHITE)
+    {
+        const Square a1 = square::fromString("a1");
+        const Square d1 = square::fromString("d1");
+        const Square f1 = square::fromString("f1");
+        const Square h1 = square::fromString("h1");
+        if (move.moveFlag() == MoveFlag::ShortCastling)
+        {
+            pieceWidgets[f1] = pieceWidgets[h1];
+            pieceWidgets[h1]->move(boardIndexToCoordinates(f1));
+            pieceWidgets[h1] = nullptr;
+        }
+        else if (move.moveFlag() == MoveFlag::LongCastling)
+        {
+            pieceWidgets[d1] = pieceWidgets[a1];
+            pieceWidgets[a1]->move(boardIndexToCoordinates(d1));
+            pieceWidgets[a1] = nullptr;
+        }
+    }
+    else
+    {
+        const Square a8 = square::fromString("a8");
+        const Square d8 = square::fromString("d8");
+        const Square f8 = square::fromString("f8");
+        const Square h8 = square::fromString("h8");
+        if (move.moveFlag() == MoveFlag::ShortCastling)
+        {
+            pieceWidgets[f8] = pieceWidgets[h8];
+            pieceWidgets[h8]->move(boardIndexToCoordinates(f8));
+            pieceWidgets[h8] = nullptr;
+        }
+        else if (move.moveFlag() == MoveFlag::LongCastling)
+        {
+            pieceWidgets[d8] = pieceWidgets[a8];
+            pieceWidgets[a8]->move(boardIndexToCoordinates(d8));
+            pieceWidgets[a8] = nullptr;
+        }
+    }
+}
+
 Move BoardWidget::getMoveFromIndexes(Square start, Square end, MoveFlag promotion) const
 {
     MoveFlag moveFlag = promotion; // Will be NONE by default
@@ -339,11 +408,33 @@ void BoardWidget::onEngineSearchDone(SearchResult move)
     repaint();
 }
 
+void BoardWidget::onUndoMove()
+{
+    Move move = board.getMoveHistory().back();
+    undoneMoves.push(move);
+    board.unmakeMove();
+    undoMovePieceWidgets(board, move);
+    updateLegalMoves();
+    repaint();
+}
+
+void BoardWidget::onRedoMove()
+{
+    Move move = undoneMoves.top();
+    undoneMoves.pop();
+    board.makeMove(move);
+    movePieceWidgets(move, true);
+    updateLegalMoves();
+    repaint();
+}
+
 void BoardWidget::flipBoardSlot()
 {
     flipBoard = !flipBoard;
     repaint();
     drawPieces();
+    updateLegalMoves();
+    repaint();
 }
 
 void BoardWidget::drawPieces()
