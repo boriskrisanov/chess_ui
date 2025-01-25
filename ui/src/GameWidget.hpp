@@ -28,7 +28,8 @@ public:
         setLayout(hLayout);
 
         connect(engineInstance, &EngineInstance::searchDone, board, &BoardWidget::onEngineSearchDone);
-        connect(engineInstance, &EngineInstance::searchDone, gameControls->getEngineInfoWidget(), &EngineInfoWidget::onSearchDone);
+        connect(engineInstance, &EngineInstance::searchDone, gameControls->getEngineInfoWidget(),
+                &EngineInfoWidget::onSearchDone);
         connect(gameControls, &GameControlsWidget::flipBoard, board, &BoardWidget::flipBoardSlot);
 
         connect(gameControls, &GameControlsWidget::undoMove, board, &BoardWidget::onUndoMove);
@@ -36,6 +37,23 @@ public:
 
         connect(board, SIGNAL(setUndoMoveEnabled(bool)), gameControls, SLOT(setUndoMoveEnabled(bool)));
         connect(board, SIGNAL(setRedoMoveEnabled(bool)), gameControls, SLOT(setRedoMoveEnabled(bool)));
+
+        connect(board, SIGNAL(movePlayed(Move, Board)), moveList, SLOT(movePlayed(Move, Board)));
+        connect(board, SIGNAL(moveUndone()), moveList, SLOT(moveUndone()));
+        connect(board, SIGNAL(moveRedone()), moveList, SLOT(moveRedone()));
+    }
+
+    void keyPressEvent(QKeyEvent* event) override
+    {
+        std::cout << event->key() << "\n";
+        if (event->key() == Qt::Key::Key_Left)
+        {
+            board->onUndoMove();
+        }
+        else if (event->key() == Qt::Key::Key_Right)
+        {
+            board->onRedoMove();
+        }
     }
 
 public slots:
@@ -51,5 +69,5 @@ private:
     QHBoxLayout* hLayout = new QHBoxLayout(this);
     GameControlsWidget* gameControls = new GameControlsWidget();
     MoveListWidget* moveList = new MoveListWidget();
-    BoardWidget* board = new BoardWidget(moveList, engineInstance, WHITE, STARTING_POSITION_FEN, this);
+    BoardWidget* board = new BoardWidget(engineInstance, WHITE, STARTING_POSITION_FEN, this);
 };

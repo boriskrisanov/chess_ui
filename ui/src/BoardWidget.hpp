@@ -1,5 +1,6 @@
 #pragma once
 
+#include <qevent.h>
 #include <QListWidget>
 #include <QSvgWidget>
 #include <thread>
@@ -16,7 +17,7 @@ class BoardWidget : public QWidget
     Q_OBJECT
 
 public:
-    explicit BoardWidget(MoveListWidget* moveList, EngineInstance* engineInstance, PieceColor playerSide, std::string startingFen, QWidget* parent = nullptr);
+    explicit BoardWidget(EngineInstance* engineInstance, PieceColor playerSide, std::string startingFen, QWidget* parent = nullptr);
 
     void paintEvent(QPaintEvent* event) override;
     void mouseMoveEvent(QMouseEvent* event) override;
@@ -54,6 +55,9 @@ public:
 signals:
     void setUndoMoveEnabled(bool);
     void setRedoMoveEnabled(bool);
+    void movePlayed(Move move, Board boardBeforeMove);
+    void moveUndone();
+    void moveRedone();
 
 public slots:
     void onEngineSearchDone(SearchResult move);
@@ -84,7 +88,6 @@ private:
     bool isPieceBeingMoved = false;
     int moveStartIndex;
     Piece pieceBeingMoved;
-    MoveListWidget* moveList;
     EngineInstance* engineInstance;
 
     bool flipBoard = false;

@@ -13,8 +13,15 @@ public:
     explicit MoveListWidget(QWidget* parent = nullptr)
         : QListWidget(parent)
     {
+
     }
-    void addMove(Move move, Board boardBeforeMove);
+signals:
+    void moveClicked(int moveNumber);
+public slots:
+    void movePlayed(const Move& move, const Board& boardBeforeMove);
+    void moveUndone();
+    void moveRedone();
 private:
-    uint16_t moveCount = 0;
+    std::stack<Move> moveHistory;
+    std::stack<Move> undoneMoves;
 };

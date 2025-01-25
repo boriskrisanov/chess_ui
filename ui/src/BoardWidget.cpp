@@ -7,9 +7,9 @@
 
 #include "GameOptions.hpp"
 
-BoardWidget::BoardWidget(MoveListWidget* moveList, EngineInstance* engineInstance, PieceColor playerSide,
+BoardWidget::BoardWidget(EngineInstance* engineInstance, PieceColor playerSide,
                          std::string startingFen, QWidget* parent)
-    : QWidget(parent), moveList(moveList), engineInstance(engineInstance), playerSide(playerSide)
+    : QWidget(parent), engineInstance(engineInstance), playerSide(playerSide)
 {
     // board.loadFen("8/1k4P1/8/1K6/8/8/8/8 w - - 0 1");
     newGame(startingFen, playerSide);
@@ -118,7 +118,7 @@ void BoardWidget::mouseReleaseEvent(QMouseEvent* event)
 
     const Move move = getMoveFromIndexes(moveStartIndex, newIndex, promotionFlag);
 
-    moveList->addMove(move, board);
+    emit movePlayed(move, board);
 
     // Don't animate user moves
     movePieceWidgets(move, false);
@@ -126,11 +126,19 @@ void BoardWidget::mouseReleaseEvent(QMouseEvent* event)
     updateLegalMoves();
     repaint();
 
+    if (!undoneMoves.empty())
+    {
+        // Start new move sequence from current position
+        while (!undoneMoves.empty())
+        {
+            undoneMoves.pop();
+        }
+        emit setRedoMoveEnabled(false);
+    }
+
     engineInstance->startSearch(board);
 
     emit setUndoMoveEnabled(true);
-
-    // moveList->addMove(move, board);
 }
 
 void BoardWidget::resizeEvent(QResizeEvent* event)
@@ -416,7 +424,7 @@ void BoardWidget::animatePieceMovement(Square pieceIndex, Square start, Square e
 void BoardWidget::onEngineSearchDone(SearchResult move)
 {
     movePieceWidgets(move.bestMove, true);
-    moveList->addMove(move.bestMove, board);
+    emit movePlayed(move.bestMove, board);
     board.makeMove(move.bestMove);
     updateLegalMoves();
     repaint();
@@ -433,6 +441,7 @@ void BoardWidget::onUndoMove()
 
     Move move = board.getMoveHistory().back();
     undoneMoves.push(move);
+    std::cout << undoneMoves.size() << "\n";
     board.unmakeMove();
     undoMovePieceWidgets(board, move);
     updateLegalMoves();
@@ -442,6 +451,7 @@ void BoardWidget::onUndoMove()
         emit setUndoMoveEnabled(false);
     }
     emit setRedoMoveEnabled(true);
+    emit moveUndone();
 }
 
 void BoardWidget::onRedoMove()
@@ -463,6 +473,7 @@ void BoardWidget::onRedoMove()
         emit setRedoMoveEnabled(false);
     }
     emit setUndoMoveEnabled(true);
+    emit moveRedone();
 }
 
 void BoardWidget::flipBoardSlot()
