@@ -82,6 +82,10 @@ void BoardWidget::mousePressEvent(QMouseEvent* event)
 
 void BoardWidget::mouseReleaseEvent(QMouseEvent* event)
 {
+    if (!isPieceBeingMoved)
+    {
+        return;
+    }
     isPieceBeingMoved = false;
     const QPoint mousePosition = event->pos();
     const int newIndex = coordinatesToBoardIndex(mousePosition);
