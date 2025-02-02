@@ -69,5 +69,5 @@ private:
     QHBoxLayout* hLayout = new QHBoxLayout(this);
     GameControlsWidget* gameControls = new GameControlsWidget();
     MoveListWidget* moveList = new MoveListWidget();
-    BoardWidget* board = new BoardWidget(engineInstance, WHITE, STARTING_POSITION_FEN, this);
+    BoardWidget* board = new BoardWidget(engineInstance, PieceColor::WHITE, STARTING_POSITION_FEN, this);
 };

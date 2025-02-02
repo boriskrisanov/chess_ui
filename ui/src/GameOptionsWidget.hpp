@@ -9,6 +9,8 @@
 
 #include "GameOptions.hpp"
 
+using enum PieceColor;
+
 class GameOptionsWidget : public QWidget
 {
     Q_OBJECT

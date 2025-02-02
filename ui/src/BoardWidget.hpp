@@ -39,7 +39,7 @@ public:
         board.loadFen(fen);
         this->playerSide = playerSide;
 
-        if (playerSide == BLACK)
+        if (playerSide == PieceColor::BLACK)
         {
             flipBoard = true;
         }
@@ -91,7 +91,7 @@ private:
     EngineInstance* engineInstance;
 
     bool flipBoard = false;
-    PieceColor playerSide = WHITE;
+    PieceColor playerSide = PieceColor::WHITE;
 
     PromotionSelector* promotionSelector = new PromotionSelector(this);
 };

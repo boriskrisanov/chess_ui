@@ -7,6 +7,8 @@
 
 #include "GameOptions.hpp"
 
+using enum PieceColor;
+
 BoardWidget::BoardWidget(EngineInstance* engineInstance, PieceColor playerSide,
                          std::string startingFen, QWidget* parent)
     : QWidget(parent), engineInstance(engineInstance), playerSide(playerSide)
@@ -38,8 +40,10 @@ void BoardWidget::paintEvent(QPaintEvent* event)
             {
                 painter.fillRect(square, legalMoveSquareColor);
             }
-            if ((board.whiteKing & bitboards::withSquare(index)) != 0 && board.isSideInCheck(WHITE)
-                || (board.blackKing & bitboards::withSquare(index)) != 0 && board.isSideInCheck(BLACK))
+            if ((board.bitboards[pieceIndexes::WHITE_KING] & bitboards::withSquare(index)) != 0 && board.
+                isSideInCheck(WHITE)
+                || (board.bitboards[pieceIndexes::BLACK_KING] & bitboards::withSquare(index)) != 0 && board.
+                isSideInCheck(BLACK))
             {
                 painter.fillRect(square, checkSquareColor);
             }
@@ -70,7 +74,7 @@ void BoardWidget::mousePressEvent(QMouseEvent* event)
         return;
     }
     const int index = coordinatesToBoardIndex(event->pos());
-    if (board[index].isNone() || board[index].color != playerSide)
+    if (board[index].isNone() || board[index].color() != playerSide)
     {
         return;
     }
@@ -102,7 +106,7 @@ void BoardWidget::mouseReleaseEvent(QMouseEvent* event)
     }
 
     MoveFlag promotionFlag = MoveFlag::None;
-    const bool isPawn = board[moveStartIndex].kind == PieceKind::PAWN;
+    const bool isPawn = board[moveStartIndex].kind() == PieceKind::PAWN;
     const bool isWhitePromotion = isPawn && square::rank(newIndex) == 8 && board.sideToMove == WHITE;
     const bool isBlackPromotion = isPawn && square::rank(newIndex) == 1 && board.sideToMove == BLACK;
 
@@ -194,7 +198,7 @@ void BoardWidget::updateLegalMoves()
 void BoardWidget::movePieceWidgets(const Move& move, bool animate)
 {
     // We can't use board.sideToMove because we might be redoing an undone move
-    const PieceColor sideToMove = board[move.start()].color;
+    const PieceColor sideToMove = board[move.start()].color();
     // Remove piece if it was captured
     if (pieceWidgets[move.end()] != nullptr)
     {
@@ -301,12 +305,12 @@ void BoardWidget::undoMovePieceWidgets(const Board boardAfterMoveUndone, const M
     animatePieceMovement(move.start(), move.end(), move.start());
 
     // Restore captured piece
-    if (move.capturedPiece.kind != PieceKind::NONE)
+    if (move.capturedPiece.kind() != PieceKind::NONE)
     {
         Square capturedPiecePosition = move.end();
         if (move.moveFlag() == MoveFlag::EnPassant)
         {
-            auto color = boardAfterMoveUndone[move.start()].color;
+            auto color = boardAfterMoveUndone[move.start()].color();
             if (color == WHITE)
             {
                 capturedPiecePosition = move.end() + 8;
@@ -364,12 +368,12 @@ Move BoardWidget::getMoveFromIndexes(Square start, Square end, MoveFlag promotio
 {
     MoveFlag moveFlag = promotion; // Will be NONE by default
     // En Passant
-    if (board[start].kind == PieceKind::PAWN && end == board.getEnPassantTargetSquare())
+    if (board[start].kind() == PieceKind::PAWN && end == board.getEnPassantTargetSquare())
     {
         moveFlag = MoveFlag::EnPassant;
     }
     // Castling
-    else if (board[start].kind == PieceKind::KING)
+    else if (board[start].kind() == PieceKind::KING)
     {
         if (board.sideToMove == WHITE)
         {
@@ -404,7 +408,7 @@ Move BoardWidget::getMoveFromIndexes(Square start, Square end, MoveFlag promotio
 void BoardWidget::addPieceWidget(Piece piece, Square position)
 {
     QString fileName = QString::fromStdString(piece.toString()).toLower() + ".svg";
-    if (piece.color == WHITE)
+    if (piece.color() == WHITE)
     {
         fileName.prepend("_");
     }
