@@ -38,7 +38,7 @@ void BoardWidget::paintEvent(QPaintEvent* event)
             if (isPieceBeingMoved && std::find(legalMovesForSquare.begin(), legalMovesForSquare.end(), index) !=
                 legalMovesForSquare.end())
             {
-                painter.fillRect(square, legalMoveSquareColor);
+                painter.fillRect(square, squareColor == lightSquareColor ? lightLegalMoveSquareColor : darkLegalMoveSquareColor);
             }
             if ((board.bitboards[pieceIndexes::WHITE_KING] & bitboards::withSquare(index)) != 0 && board.
                 isSideInCheck(WHITE)

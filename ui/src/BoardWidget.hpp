@@ -79,7 +79,8 @@ private:
 
     const QColor lightSquareColor{240, 217, 181};
     const QColor darkSquareColor{181, 136, 99};
-    const QColor legalMoveSquareColor{66, 135, 245};
+    const QColor lightLegalMoveSquareColor{130, 151, 105};
+    const QColor darkLegalMoveSquareColor{100, 111, 65};
     const QColor checkSquareColor{255, 70, 60};
     int squareSize;
     Board board;
