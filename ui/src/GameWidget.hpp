@@ -38,9 +38,12 @@ public:
         connect(board, SIGNAL(setUndoMoveEnabled(bool)), gameControls, SLOT(setUndoMoveEnabled(bool)));
         connect(board, SIGNAL(setRedoMoveEnabled(bool)), gameControls, SLOT(setRedoMoveEnabled(bool)));
 
-        connect(board, SIGNAL(movePlayed(Move, Board)), moveList, SLOT(movePlayed(Move, Board)));
+        connect(board, SIGNAL(movePlayed(Move,Board)), moveList, SLOT(movePlayed(Move, Board)));
         connect(board, SIGNAL(moveUndone()), moveList, SLOT(moveUndone()));
         connect(board, SIGNAL(moveRedone()), moveList, SLOT(moveRedone()));
+
+        connect(board, SIGNAL(gameEnded(std::string)), gameControls, SLOT(gameEnded(std::string)));
+        connect(gameControls, SIGNAL(copyPgn()), this, SLOT(copyPgn()));
     }
 
     void keyPressEvent(QKeyEvent* event) override
@@ -70,4 +73,23 @@ private:
     GameControlsWidget* gameControls = new GameControlsWidget();
     MoveListWidget* moveList = new MoveListWidget();
     BoardWidget* board = new BoardWidget(engineInstance, PieceColor::WHITE, STARTING_POSITION_FEN, this);
+
+private slots:
+    void copyPgn() const
+    {
+        if (moveList->count() == 0)
+        {
+            // Prevents clearing the clipboard when no moves have been made
+            return;
+        }
+
+        QString gamePgn;
+        for (int i = 0; i < moveList->count(); i++)
+        {
+            gamePgn.push_back(moveList->item(i)->text());
+            gamePgn.push_back(" ");
+        }
+
+        QGuiApplication::clipboard()->setText(gamePgn.trimmed());
+    }
 };

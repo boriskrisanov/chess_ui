@@ -38,7 +38,9 @@ void BoardWidget::paintEvent(QPaintEvent* event)
             if (isPieceBeingMoved && std::find(legalMovesForSquare.begin(), legalMovesForSquare.end(), index) !=
                 legalMovesForSquare.end())
             {
-                painter.fillRect(square, squareColor == lightSquareColor ? lightLegalMoveSquareColor : darkLegalMoveSquareColor);
+                painter.fillRect(square, squareColor == lightSquareColor
+                                             ? lightLegalMoveSquareColor
+                                             : darkLegalMoveSquareColor);
             }
             if ((board.bitboards[pieceIndexes::WHITE_KING] & bitboards::withSquare(index)) != 0 && board.
                 isSideInCheck(WHITE)
@@ -142,11 +144,14 @@ void BoardWidget::mouseReleaseEvent(QMouseEvent* event)
             undoneMoves.pop();
         }
         emit setRedoMoveEnabled(false);
+        emit gameEnded(""); // TODO: Improve architecture
     }
 
     engineInstance->startSearch(board);
 
     emit setUndoMoveEnabled(true);
+
+    updateGameEndState();
 }
 
 void BoardWidget::resizeEvent(QResizeEvent* event)
@@ -429,6 +434,44 @@ void BoardWidget::animatePieceMovement(Square pieceIndex, Square start, Square e
     animation->start();
 }
 
+void BoardWidget::updateGameEndState()
+{
+    if (board.isCheckmate(WHITE))
+    {
+        emit gameEnded("White won by checkmate");
+        return;
+    }
+    if (board.isCheckmate(BLACK))
+    {
+        emit gameEnded("Black won by checkmate");
+        return;
+    }
+
+
+    std::string drawReason;
+    if (board.isInsufficientMaterial())
+    {
+        drawReason = "due to insufficient material";
+    }
+    else if (board.isStalemate())
+    {
+        drawReason = "due to stalemate";
+    }
+    else if (board.isThreefoldRepetition())
+    {
+        drawReason = "by threefold repetition";
+    }
+    else if (board.isDrawByFiftyMoveRule())
+    {
+        drawReason = "by fifty move rule";
+    }
+
+    if (!drawReason.empty())
+    {
+        emit gameEnded("Draw " + drawReason);
+    }
+}
+
 void BoardWidget::onEngineSearchDone(SearchResult move)
 {
     movePieceWidgets(move.bestMove, true);
@@ -437,6 +480,7 @@ void BoardWidget::onEngineSearchDone(SearchResult move)
     updateLegalMoves();
     repaint();
     emit setUndoMoveEnabled(true);
+    updateGameEndState();
 }
 
 void BoardWidget::onUndoMove()

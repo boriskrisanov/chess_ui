@@ -58,6 +58,7 @@ signals:
     void movePlayed(Move move, Board boardBeforeMove);
     void moveUndone();
     void moveRedone();
+    void gameEnded(std::string reason);
 
 public slots:
     void onEngineSearchDone(SearchResult move);
@@ -74,6 +75,7 @@ private:
     Move getMoveFromIndexes(Square start, Square end, MoveFlag promotion) const;
     void addPieceWidget(Piece piece, Square position);
     void animatePieceMovement(Square pieceIndex, Square start, Square end) const;
+    void updateGameEndState();
 
     std::stack<Move> undoneMoves;
 
