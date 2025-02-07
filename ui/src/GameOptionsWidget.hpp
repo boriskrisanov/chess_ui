@@ -6,6 +6,7 @@
 #include <QRadioButton>
 #include <QSpinBox>
 #include <random>
+#include <QMessageBox>
 
 #include "GameOptions.hpp"
 
@@ -72,6 +73,9 @@ private:
 
     QPushButton* startGameButton = new QPushButton("Start Game");
 
+    QMessageBox* invalidFenMessageBox = new
+        QMessageBox(QMessageBox::Icon::Critical, "Invalid FEN", "Invalid FEN", QMessageBox::NoButton, this);
+
     int engineLevel = 1;
 
     std::random_device randomDevice;
@@ -93,6 +97,18 @@ private slots:
 
     void startButtonClicked()
     {
+        // Validate FEN
+        try
+        {
+            Board board;
+            board.loadFen(fenInput->text().toStdString());
+        }
+        catch (std::invalid_argument& e)
+        {
+            invalidFenMessageBox->exec();
+            return;
+        }
+
         PieceColor playerSide;
         if (whiteSideRadioButton->isChecked())
         {
@@ -107,8 +123,6 @@ private slots:
             playerSide = uniformIntDistribution(rng) == 0 ? WHITE : BLACK;
         }
 
-        // TODO: Validate FEN
-
         GameOptions gameOptions{
             32 * engineLevel,
             std::chrono::milliseconds(250 * engineLevel),
@@ -118,6 +132,7 @@ private slots:
 
         emit gameStarted(gameOptions);
     }
+
 signals:
     void gameStarted(GameOptions gameOptions);
 };
