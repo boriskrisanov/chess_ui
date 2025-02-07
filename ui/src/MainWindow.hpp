@@ -22,6 +22,7 @@ public:
 
         connect(gameOptionsWidget, SIGNAL(gameStarted(GameOptions)), this, SLOT(gameStarted()));
         connect(gameOptionsWidget, SIGNAL(gameStarted(GameOptions)), gameWidget, SLOT(gameStarted(GameOptions)));
+        connect(gameWidget->getGameControls(), SIGNAL(newGame()), this, SLOT(newGame()));
     }
 
 private:
@@ -35,5 +36,12 @@ private slots:
         gameOptionsWidget->hide();
         gameWidget->show();
         setWindowState(Qt::WindowMaximized);
+    }
+
+    void newGame()
+    {
+        gameWidget->hide();
+        gameOptionsWidget->show();
+        adjustSize();
     }
 };

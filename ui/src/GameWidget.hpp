@@ -59,6 +59,11 @@ public:
         }
     }
 
+    GameControlsWidget* getGameControls() const
+    {
+        return gameControls;
+    }
+
 public slots:
     void gameStarted(GameOptions gameOptions)
     {

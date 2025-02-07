@@ -15,8 +15,6 @@ public:
     {
 
     }
-signals:
-    void moveClicked(int moveNumber);
 public slots:
     void movePlayed(const Move& move, const Board& boardBeforeMove);
     void moveUndone();

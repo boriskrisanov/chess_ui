@@ -20,7 +20,7 @@ public:
         vLayout->addWidget(backButton);
         vLayout->addWidget(forwardButton);
         vLayout->addWidget(flipBoardButton);
-        vLayout->addWidget(endGameButton);
+        vLayout->addWidget(newGameButton);
         vLayout->addWidget(copyPgnButton);
         vLayout->addWidget(gameEndMessage);
 
@@ -36,6 +36,7 @@ public:
         connect(flipBoardButton, SIGNAL(clicked(bool)), this, SLOT(flipBoardButtonClicked()));
         connect(backButton, SIGNAL(clicked(bool)), this, SLOT(undoMoveButtonClicked()));
         connect(forwardButton, SIGNAL(clicked(bool)), this, SLOT(redoMoveButtonClicked()));
+        connect(newGameButton, SIGNAL(clicked(bool)), this, SLOT(newGameButtonClicked()));
     }
 
     // TODO: Forward signals from engine instance?
@@ -60,6 +61,11 @@ public slots:
         gameEndMessage->setText(reason.data());
     }
 
+    void newGameButtonClicked()
+    {
+        emit newGame();
+    }
+
 private:
     QVBoxLayout* vLayout = new QVBoxLayout(this);
     EngineInfoWidget* engineInfoWidget = new EngineInfoWidget(this);
@@ -67,7 +73,7 @@ private:
     QPushButton* backButton = new QPushButton("<");
     QPushButton* forwardButton = new QPushButton(">");
     QPushButton* flipBoardButton = new QPushButton("Flip Board");
-    QPushButton* endGameButton = new QPushButton("End Game");
+    QPushButton* newGameButton = new QPushButton("New Game");
     QPushButton* copyPgnButton = new QPushButton("Copy PGN");
     QLabel* gameEndMessage = new QLabel();
 signals:
@@ -75,6 +81,7 @@ signals:
     void undoMove();
     void redoMove();
     void copyPgn();
+    void newGame();
 
 private slots:
     void flipBoardButtonClicked()

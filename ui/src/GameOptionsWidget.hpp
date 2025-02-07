@@ -74,7 +74,7 @@ private:
     QPushButton* startGameButton = new QPushButton("Start Game");
 
     QMessageBox* invalidFenMessageBox = new
-        QMessageBox(QMessageBox::Icon::Critical, "Invalid FEN", "Invalid FEN", QMessageBox::NoButton, this);
+        QMessageBox(QMessageBox::Icon::Critical, "Chess", "Invalid FEN", QMessageBox::NoButton, this);
 
     int engineLevel = 1;
 
@@ -98,10 +98,11 @@ private slots:
     void startButtonClicked()
     {
         // Validate FEN
+        const std::string fen = fenInput->text().replace(" ", "").isEmpty() ? STARTING_POSITION_FEN : fenInput->text().toStdString();
         try
         {
             Board board;
-            board.loadFen(fenInput->text().toStdString());
+            board.loadFen(fen);
         }
         catch (std::invalid_argument& e)
         {
@@ -127,7 +128,7 @@ private slots:
             32 * engineLevel,
             std::chrono::milliseconds(250 * engineLevel),
             playerSide,
-            fenInput->text().isEmpty() ? STARTING_POSITION_FEN : fenInput->text().toStdString()
+            fen
         };
 
         emit gameStarted(gameOptions);
