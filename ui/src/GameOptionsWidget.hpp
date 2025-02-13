@@ -125,7 +125,7 @@ private slots:
         }
 
         GameOptions gameOptions{
-            32 * engineLevel,
+            100 * engineLevel,
             std::chrono::milliseconds(250 * engineLevel),
             playerSide,
             fen
