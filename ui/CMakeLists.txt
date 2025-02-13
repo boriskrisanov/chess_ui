@@ -19,7 +19,6 @@ add_executable(chess_ui_cpp src/main.cpp
         src/GameWidget.hpp
         src/BoardWidget.hpp
         src/BoardWidget.cpp
-        src/PromotionSelector.cpp
         src/PromotionSelector.hpp
         src/MoveListWidget.hpp
         src/MoveListWidget.cpp
