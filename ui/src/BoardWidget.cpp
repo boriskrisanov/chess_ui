@@ -438,12 +438,12 @@ void BoardWidget::updateGameEndState()
 {
     if (board.isCheckmate(WHITE))
     {
-        emit gameEnded("White won by checkmate");
+        emit gameEnded("Black won by checkmate");
         return;
     }
     if (board.isCheckmate(BLACK))
     {
-        emit gameEnded("Black won by checkmate");
+        emit gameEnded("White won by checkmate");
         return;
     }
 

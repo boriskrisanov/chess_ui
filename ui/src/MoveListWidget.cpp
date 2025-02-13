@@ -58,3 +58,17 @@ void MoveListWidget::moveRedone()
     // Divide by 2 because a single entry stores two half moves
     setCurrentRow((moveHistory.size() - 1) / 2);
 }
+
+void MoveListWidget::newGame()
+{
+    clear();
+    while (!moveHistory.empty())
+    {
+        moveHistory.pop();
+    }
+    while (!undoneMoves.empty())
+    {
+        undoneMoves.pop();
+    }
+    QListWidget::reset();
+}

@@ -19,6 +19,7 @@ public slots:
     void movePlayed(const Move& move, const Board& boardBeforeMove);
     void moveUndone();
     void moveRedone();
+    void newGame();
 private:
     std::stack<Move> moveHistory;
     std::stack<Move> undoneMoves;

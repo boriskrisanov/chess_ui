@@ -44,6 +44,8 @@ public:
 
         connect(board, SIGNAL(gameEnded(std::string)), gameControls, SLOT(gameEnded(std::string)));
         connect(gameControls, SIGNAL(copyPgn()), this, SLOT(copyPgn()));
+
+        connect(gameControls, SIGNAL(newGame()), moveList, SLOT(newGame()));
     }
 
     void keyPressEvent(QKeyEvent* event) override

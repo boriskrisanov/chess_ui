@@ -56,13 +56,14 @@ public slots:
         forwardButton->setEnabled(enabled);
     }
 
-    void gameEnded(std::string reason) const
+    void gameEnded(const std::string& reason) const
     {
         gameEndMessage->setText(reason.data());
     }
 
     void newGameButtonClicked()
     {
+        gameEndMessage->clear();
         emit newGame();
     }
 
