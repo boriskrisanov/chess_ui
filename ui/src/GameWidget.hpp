@@ -50,7 +50,6 @@ public:
 
     void keyPressEvent(QKeyEvent* event) override
     {
-        std::cout << event->key() << "\n";
         if (event->key() == Qt::Key::Key_Left)
         {
             board->onUndoMove();
